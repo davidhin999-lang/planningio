@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — Spelling Bee</title>
+  <link rel="stylesheet" href="/static/tailwind.output.css?v={{ range(1,99999)|random }}">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { min-height: 100vh; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      font-family: 'Nunito', sans-serif; color: #fff; padding: 24px 16px; }
+
+    .header { display: flex; align-items: center; justify-content: space-between;
+      max-width: 900px; margin: 0 auto 32px; flex-wrap: wrap; gap: 12px; }
+    .header h1 { font-size: 28px; font-weight: 900; }
+    .header h1 span { color: #f59e0b; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .btn { padding: 10px 20px; border-radius: 10px; border: none; font-family: 'Nunito', sans-serif;
+      font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+    .btn:hover { opacity: 0.85; }
+    .btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+    .btn-red { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+    .btn-gray { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.15); }
+    .btn-sm { padding: 6px 14px; font-size: 13px; }
+    .btn-danger { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .btn-danger:hover { background: rgba(239,68,68,0.3); }
+    .btn-edit { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+    .btn-edit:hover { background: rgba(245,158,11,0.3); }
+
+    .tabs { display: flex; gap: 4px; max-width: 900px; margin: 0 auto 24px;
+      background: rgba(255,255,255,0.05); border-radius: 12px; padding: 4px; }
+    .tab { flex: 1; padding: 10px; border-radius: 9px; border: none; background: transparent;
+      color: rgba(255,255,255,0.5); font-family: 'Nunito', sans-serif; font-size: 14px;
+      font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .tab.active { background: rgba(255,255,255,0.12); color: #fff; }
+
+    .panel { max-width: 900px; margin: 0 auto; display: none; }
+    .panel.active { display: block; }
+
+    .card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+    .card h2 { font-size: 18px; font-weight: 800; margin-bottom: 16px; color: #f59e0b; }
+
+    /* Create team form */
+    .create-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .form-group input, .form-group select { padding: 10px 14px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08);
+      color: #fff; font-size: 14px; font-family: 'Nunito', sans-serif; outline: none; }
+    .form-group input:focus { border-color: #f59e0b; }
+    .form-group input[type="color"] { padding: 4px 8px; height: 42px; width: 80px; cursor: pointer; }
+
+    /* Teams list */
+    .teams-list { display: flex; flex-direction: column; gap: 10px; }
+    .team-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+      background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
+    .team-dot { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; }
+    .team-emoji { font-size: 22px; flex-shrink: 0; }
+    .team-info { flex: 1; }
+    .team-name { font-weight: 800; font-size: 16px; }
+    .team-meta { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .team-score-badge { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3);
+      color: #fbbf24; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+    .team-actions { display: flex; gap: 8px; }
+
+    /* Standings table */
+    .standings-week { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 16px; }
+    .podium { display: flex; flex-direction: column; gap: 8px; }
+    .podium-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+      border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+    .podium-row.rank-1 { background: rgba(255,215,0,0.08); border-color: rgba(255,215,0,0.25); }
+    .podium-row.rank-2 { background: rgba(192,192,192,0.06); border-color: rgba(192,192,192,0.2); }
+    .podium-row.rank-3 { background: rgba(205,127,50,0.06); border-color: rgba(205,127,50,0.2); }
+    .podium-rank { font-size: 22px; width: 32px; text-align: center; }
+    .podium-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+    .podium-name { flex: 1; font-weight: 800; font-size: 15px; }
+    .podium-pts { font-size: 18px; font-weight: 900; color: #f59e0b; }
+    .podium-games { font-size: 12px; color: rgba(255,255,255,0.4); margin-left: 4px; }
+
+    /* History */
+    .history-week { margin-bottom: 20px; }
+    .history-week-label { font-size: 14px; font-weight: 800; color: #f59e0b; margin-bottom: 10px; padding: 6px 12px;
+      background: rgba(245,158,11,0.1); border-radius: 8px; display: inline-block; }
+    .history-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+      border-radius: 8px; background: rgba(255,255,255,0.03); margin-bottom: 4px; }
+    .history-row.history-winner { background: rgba(255,215,0,0.06); border: 1px solid rgba(255,215,0,0.15); }
+    .history-rank { width: 24px; font-size: 13px; color: rgba(255,255,255,0.4); }
+    .history-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .history-name { flex: 1; font-size: 14px; font-weight: 700; }
+    .history-pts { font-size: 14px; font-weight: 800; color: #fbbf24; }
+
+    /* Reset button area */
+    .reset-area { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .reset-warning { font-size: 13px; color: rgba(255,255,255,0.4); }
+
+    /* Edit modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center; z-index: 100; display: none; }
+    .modal-overlay.open { display: flex; }
+    .modal-card { background: #1e2a45; border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px; padding: 32px; width: 100%; max-width: 400px; }
+    .modal-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #22c55e; color: #fff; padding: 12px 24px; border-radius: 12px;
+      font-weight: 700; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; }
+    .toast.show { opacity: 1; }
+    .toast.error { background: #ef4444; }
+
+    .empty { color: rgba(255,255,255,0.3); font-size: 14px; text-align: center; padding: 32px; }
+
+    /* Players list */
+    .players-list { display: flex; flex-direction: column; gap: 6px; }
+    .player-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+      background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
+      transition: background 0.15s; }
+    .player-row:hover { background: rgba(255,255,255,0.07); }
+    .player-row.selected { background: rgba(102,126,234,0.12); border-color: rgba(102,126,234,0.3); }
+    .player-check { width: 18px; height: 18px; accent-color: #667eea; cursor: pointer; flex-shrink: 0; }
+    .player-avatar { font-size: 20px; width: 32px; text-align: center; flex-shrink: 0; }
+    .player-info { flex: 1; min-width: 0; }
+    .player-name { font-weight: 800; font-size: 14px; }
+    .player-meta { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 1px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .player-team-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+    .player-team-none { color: rgba(255,255,255,0.3); font-style: italic; font-size: 11px; }
+    .player-stats { display: flex; gap: 6px; flex-shrink: 0; }
+    .player-stat { font-size: 11px; padding: 3px 8px; border-radius: 8px; font-weight: 700;
+      background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); white-space: nowrap; }
+    .player-stat.ranked { background: rgba(245,158,11,0.12); color: #fbbf24; }
+    .player-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .player-actions .btn-sm { padding: 4px 10px; font-size: 11px; }
+    .bulk-team-select { padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.08); color: #fff; font-size: 13px; font-family: 'Nunito', sans-serif; min-width: 160px; }
+
+    /* Assign team modal */
+    .assign-team-list { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; }
+    .assign-team-option { display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+      border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); cursor: pointer;
+      transition: background 0.15s, border-color 0.15s; }
+    .assign-team-option:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+    .assign-team-option.chosen { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.4); }
+
+    /* Expanded team cards with members */
+    .team-card-expanded { background: rgba(255,255,255,0.04); border-radius: 14px; margin-bottom: 12px; overflow: hidden; }
+    .team-card-expanded .team-row { border: none; margin: 0; border-radius: 0; }
+    .team-members-section { padding: 0 16px 14px; }
+    .team-members-header { font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
+    .team-members-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; min-height: 24px; }
+    .member-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px;
+      background: rgba(255,255,255,0.08); font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.8); }
+    .member-chip.member-pending { background: rgba(251,191,36,0.1); border: 1px dashed rgba(251,191,36,0.3); color: rgba(255,255,255,0.5); }
+    .member-remove { cursor: pointer; font-size: 14px; color: rgba(255,255,255,0.25); margin-left: 2px; line-height: 1; }
+    .member-remove:hover { color: #f87171; }
+    .team-add-player { display: flex; gap: 8px; align-items: center; }
+
+    @media (max-width: 600px) {
+      .create-form { flex-direction: column; }
+      .team-actions { flex-direction: column; }
+      .player-stats { display: none; }
+      .player-actions { flex-direction: column; }
+      .team-add-player { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div>
+      <h1>Spelling Bee <span>Admin</span></h1>
+      {% if locked_group %}
+        <div style="margin-top:4px;font-size:14px;color:#fbbf24;font-weight:600;">
+          🔒 Locked to: {{ group_label }} ({{ locked_group }})
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="header-actions">
+    <a href="/" class="btn btn-gray">← Game</a>
+    <form method="POST" action="/admin/logout" style="display:inline">
+      <button type="submit" class="btn btn-gray">Logout</button>
+    </form>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('teams')">🏅 Teams</button>
+  <button class="tab" onclick="showTab('players')">👥 Players</button>
+  <button class="tab" onclick="showTab('standings')">🏆 Standings</button>
+  <button class="tab" onclick="showTab('history')">📅 History</button>
+  <button class="tab" onclick="showTab('ranked-history')">⭐ Ranked History</button>
+</div>
+
+<!-- TEAMS PANEL -->
+<div id="panel-teams" class="panel active">
+  <div class="card">
+    <h2>Create New Team</h2>
+    <div class="create-form">
+      <div class="form-group">
+        <label>Team Name</label>
+        <input type="text" id="new-name" placeholder="e.g. Team Red" maxlength="30" />
+      </div>
+      <div class="form-group">
+        <label>Color</label>
+        <input type="color" id="new-color" value="#ef4444" />
+      </div>
+      <div class="form-group">
+        <label>Emoji</label>
+        <input type="text" id="new-emoji" placeholder="🔴" maxlength="4" style="width:80px" />
+      </div>
+      <div class="form-group">
+        <label>Avatar (optional)</label>
+        <input type="file" id="new-avatar" accept="image/*" style="display:none" onchange="uploadAvatar(this)" />
+        <button type="button" class="btn btn-gray btn-sm" onclick="document.getElementById('new-avatar').click()">📷 Upload Avatar</button>
+        <img id="avatar-preview" style="display:none;width:40px;height:40px;border-radius:50%;margin-left:10px;object-fit:cover" />
+        <input type="hidden" id="new-avatar-url" />
+      </div>
+      <button class="btn btn-gold" onclick="createTeam()">+ Create Team</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>All Teams</h2>
+    <div style="margin-bottom: 16px;">
+      <button class="btn btn-red" onclick="resetGroupScores('group1')" style="margin-right: 10px;">🔄 Reset Group 1 Scores</button>
+      <button class="btn btn-red" onclick="resetWeekScores()" style="margin-right: 10px;">🔄 Reset All Week Scores</button>
+      <span style="font-size: 12px; color: rgba(255,255,255,0.5);">⚠️ This will delete all scores and reset attempts</span>
+    </div>
+    <div id="teams-list" class="teams-list">
+      <div class="empty">Loading teams...</div>
+    </div>
+  </div>
+</div>
+
+<!-- PLAYERS PANEL -->
+<div id="panel-players" class="panel">
+  <div class="card">
+    <h2>🎮 Master Controls</h2>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-gold" onclick="bulkResetAttempts()">🔄 Reset ALL Ranked Attempts</button>
+      <button class="btn btn-red" onclick="bulkDeleteUnteamed()">🗑️ Delete Unassigned Players</button>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+      <div class="form-group">
+        <label>Bulk Assign Team</label>
+        <select id="bulk-team-select" class="bulk-team-select"></select>
+      </div>
+      <button class="btn btn-gold btn-sm" onclick="bulkAssignSelected()">Assign Selected → Team</button>
+      <button class="btn btn-gray btn-sm" onclick="selectAllPlayers()">Select All</button>
+      <button class="btn btn-gray btn-sm" onclick="deselectAllPlayers()">Deselect All</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>All Players <span id="player-count" style="font-size:14px;color:rgba(255,255,255,0.4);font-weight:600"></span></h2>
+    <div style="margin-bottom:12px">
+      <input type="text" id="player-search" placeholder="🔍 Search players..." oninput="filterPlayers()"
+        style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:14px;font-family:'Nunito',sans-serif;outline:none" />
+    </div>
+    <div id="players-list" class="players-list">
+      <div class="empty">Loading players...</div>
+    </div>
+  </div>
+</div>
+
+<!-- STANDINGS PANEL -->
+<div id="panel-standings" class="panel">
+  <div class="card">
+    <h2>Current Week Standings</h2>
+    <div id="standings-week" class="standings-week"></div>
+    <div id="winner-banner" style="display:none;background:linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05));border:2px solid rgba(255,215,0,0.3);border-radius:12px;padding:16px;margin-bottom:16px;text-align:center">
+      <div style="font-size:24px;margin-bottom:8px">🏆</div>
+      <div style="font-size:18px;font-weight:900;color:#fbbf24" id="winner-name"></div>
+      <div style="font-size:14px;color:rgba(255,255,255,0.7)" id="winner-score"></div>
+    </div>
+    <div id="standings-podium" class="podium">
+      <div class="empty">Loading...</div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Weekly History</h2>
+    <div class="reset-area">
+      <button class="btn btn-gold" onclick="saveWeekSnapshot()">📸 Save Week to History</button>
+      <button class="btn btn-red" onclick="confirmReset()">🗑️ Reset This Week's Scores</button>
+      <span class="reset-warning">Reset clears all team scores for the current week. Cannot be undone.</span>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY PANEL -->
+<div id="panel-history" class="panel">
+  <div class="card">
+    <h2>All-Time History</h2>
+    <div id="history-list">
+      <div class="empty">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<!-- RANKED HISTORY PANEL -->
+<div id="panel-ranked-history" class="panel">
+  <div class="card">
+    <h2>Ranked Mode History - All Weeks</h2>
+    <div id="ranked-history-list">
+      <div class="empty">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ASSIGN TEAM MODAL -->
+<div id="assign-modal" class="modal-overlay">
+  <div class="modal-card">
+    <h3>Assign Team</h3>
+    <p style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:14px">Assigning: <strong id="assign-player-name" style="color:#fff"></strong></p>
+    <div id="assign-team-list" class="assign-team-list"></div>
+    <div class="modal-actions">
+      <button class="btn btn-gray" onclick="closeAssignModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="unassignPlayer()">Remove from Team</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div id="edit-modal" class="modal-overlay">
+  <div class="modal-card">
+    <h3>Edit Team</h3>
+    <input type="hidden" id="edit-id" />
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Team Name</label>
+      <input type="text" id="edit-name" maxlength="30" />
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Color</label>
+      <input type="color" id="edit-color" />
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Emoji</label>
+      <input type="text" id="edit-emoji" maxlength="4" style="width:80px" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-gray" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- RENAME PLAYER MODAL -->
+<div id="rename-modal" class="modal-overlay">
+  <div class="modal-card">
+    <h3>✏️ Rename Player</h3>
+    <p style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:14px">Current name: <strong id="rename-old-name" style="color:#fff"></strong></p>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>New Username</label>
+      <input type="text" id="rename-new-name" maxlength="30" placeholder="Enter new name" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-gray" onclick="closeRenameModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="confirmRename()">Rename</button>
+    </div>
+  </div>
+</div>
+
+<!-- PLAYER HISTORY MODAL -->
+<div id="history-modal" class="modal-overlay">
+  <div class="modal-card" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+    <h3>📊 Player History</h3>
+    <p style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:14px">Player: <strong id="history-player-name" style="color:#fff"></strong></p>
+    <div id="history-content">
+      <div style="text-align: center; padding: 20px; color: rgba(255,255,255,0.5);">
+        Loading history...
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-gray" onclick="closeHistoryModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+var currentTab = "teams";
+var adminPw = localStorage.getItem('admin_pw') || '';
+
+// Redirect to login if no password stored
+if (!adminPw) { window.location.href = '/admin/login'; }
+
+// Helper: fetch with auth header, redirect to login on 401
+function adminFetch(url, opts) {
+  opts = opts || {};
+  opts.headers = opts.headers || {};
+  opts.headers['X-Admin-Password'] = adminPw;
+  // Add locked_group parameter if present in URL
+  var urlParams = new URLSearchParams(window.location.search);
+  var lockedGroup = urlParams.get('group');  // Look for 'group' parameter in URL
+  if (lockedGroup) {
+    url += (url.indexOf('?') === -1 ? '?' : '&') + 'locked_group=' + encodeURIComponent(lockedGroup);
+  }
+  return fetch(url, opts).then(function(r) {
+    if (r.status === 401) {
+      localStorage.removeItem('admin_pw');
+      window.location.href = '/admin/login';
+      throw new Error('Unauthorized');
+    }
+    return r;
+  });
+}
+
+function showTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll(".tab").forEach(function(t) { t.classList.remove("active"); });
+  document.querySelectorAll(".panel").forEach(function(p) { p.classList.remove("active"); });
+  var tabs = document.querySelectorAll(".tab");
+  var idx = ["teams","players","standings","history","ranked-history"].indexOf(tab);
+  if (tabs[idx]) tabs[idx].classList.add("active");
+  var panel = document.getElementById("panel-" + tab);
+  if (panel) panel.classList.add("active");
+  if (tab === "players") loadPlayers();
+  if (tab === "standings") loadStandings();
+  if (tab === "history") loadHistory();
+  if (tab === "ranked-history") loadRankedHistory();
+}
+
+function showToast(msg, isError) {
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show" + (isError ? " error" : "");
+  setTimeout(function() { t.className = "toast"; }, 2500);
+}
+
+// ---- TEAMS ----
+function loadTeams() {
+  adminFetch("/admin/api/teams")
+    .then(function(r) { return r.json(); })
+    .then(function(data) { renderTeams(data.teams || []); })
+    .catch(function(e) { if (e.message !== 'Unauthorized') document.getElementById("teams-list").innerHTML = '<div class="empty">Error loading teams.</div>'; });
+}
+
+function renderTeams(teams) {
+  var el = document.getElementById("teams-list");
+  if (teams.length === 0) { el.innerHTML = '<div class="empty">No teams yet. Create your first team above!</div>'; return; }
+  el.innerHTML = "";
+  teams.forEach(function(t) {
+    var card = document.createElement("div");
+    card.className = "team-card-expanded";
+    card.style.border = "1px solid " + t.color + "44";
+    card.innerHTML =
+      '<div class="team-row">' +
+        '<div class="team-emoji">' + (t.emoji || "🏅") + '</div>' +
+        '<div class="team-dot" style="background:' + t.color + '"></div>' +
+        '<div class="team-info">' +
+          '<div class="team-name">' + escHtml(t.name) + '</div>' +
+          '<div class="team-meta">' + (t.games_played || 0) + ' games · ' + (t.weekly_score || 0) + ' pts</div>' +
+        '</div>' +
+        '<div class="team-actions">' +
+          '<button class="btn btn-sm btn-edit" onclick="openEdit(\'' + t.id + '\',\'' + escHtml(t.name) + '\',\'' + t.color + '\',\'' + (t.emoji||"🏅") + '\')">Edit</button>' +
+          '<button class="btn btn-sm btn-danger" onclick="deleteTeam(\'' + t.id + '\',\'' + escHtml(t.name) + '\')">Delete</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="team-members-section">' +
+        '<div class="team-members-header">👥 Members <span id="member-count-' + t.id + '" style="color:rgba(255,255,255,0.3)"></span></div>' +
+        '<div id="team-members-' + t.id + '" class="team-members-list"><span style="color:rgba(255,255,255,0.3);font-size:12px">Loading...</span></div>' +
+        '<div class="team-add-player">' +
+          '<input type="text" id="add-player-' + t.id + '" placeholder="Add usernames (comma-separated)" style="flex:1;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:13px;font-family:Nunito,sans-serif;outline:none" />' +
+          '<button class="btn btn-sm btn-gold" onclick="preRegisterPlayers(\'' + t.id + '\',\'' + escHtml(t.name) + '\',\'' + t.color + '\')">+ Add</button>' +
+        '</div>' +
+      '</div>';
+    el.appendChild(card);
+  });
+  // Load members for each team
+  loadAllTeamMembers(teams);
+}
+
+function loadAllTeamMembers(teams) {
+  adminFetch("/admin/api/players")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var players = data.players || [];
+      teams.forEach(function(t) {
+        var members = players.filter(function(p) { return p.team_id === t.id; });
+        var el = document.getElementById("team-members-" + t.id);
+        var countEl = document.getElementById("member-count-" + t.id);
+        if (countEl) countEl.textContent = "(" + members.length + ")";
+        if (!el) return;
+        if (members.length === 0) {
+          el.innerHTML = '<span style="color:rgba(255,255,255,0.25);font-size:12px;font-style:italic">No members yet — add usernames below</span>';
+          return;
+        }
+        el.innerHTML = "";
+        members.forEach(function(p) {
+          var chip = document.createElement("span");
+          chip.className = "member-chip" + (p.has_pin ? "" : " member-pending");
+          chip.innerHTML = (p.avatar || "👤") + " " + escHtml(p.name) +
+            (p.has_pin ? "" : ' <span style="font-size:10px;opacity:0.5">⏳</span>') +
+            ' <span class="member-remove" onclick="removeFromTeam(\'' + escHtml(p.name) + '\')" title="Remove from team">&times;</span>';
+          el.appendChild(chip);
+        });
+      });
+    });
+}
+
+function preRegisterPlayers(teamId, teamName, teamColor) {
+  var input = document.getElementById("add-player-" + teamId);
+  if (!input) return;
+  var names = input.value.trim();
+  if (!names) { showToast("Enter at least one username", true); return; }
+  adminFetch("/admin/api/players/pre-register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ names: names, team_id: teamId, team_name: teamName, team_color: teamColor })
+  }).then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) {
+        input.value = "";
+        showToast(d.created + " added, " + d.updated + " updated");
+        loadTeams();
+      } else { showToast(d.error || "Error", true); }
+    }).catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error", true); });
+}
+
+function removeFromTeam(name) {
+  if (!confirm("Remove \"" + name + "\" from their team?")) return;
+  adminFetch("/admin/api/players/" + encodeURIComponent(name) + "/team", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ team_id: "" })
+  }).then(function(r) { return r.json(); })
+    .then(function(d) { if (d.ok) { showToast(name + " removed"); loadTeams(); } })
+    .catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error", true); });
+}
+
+function createTeam() {
+  var name = document.getElementById("new-name").value.trim();
+  var color = document.getElementById("new-color").value;
+  var emoji = document.getElementById("new-emoji").value;
+  var avatarUrl = document.getElementById("new-avatar-url").value;
+  if (!name) { showToast("Team name required", true); return; }
+  adminFetch("/admin/api/teams", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: name, color: color, emoji: emoji, avatar_url: avatarUrl })
+  }).then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) { 
+        document.getElementById("new-name").value = "";
+        document.getElementById("new-emoji").value = "🏅";
+        document.getElementById("new-avatar-url").value = "";
+        document.getElementById("avatar-preview").style.display = "none";
+        showToast("Team created!"); loadTeams(); 
+      }
+      else { showToast(d.error || "Error", true); }
+    }).catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error", true); });
+}
+
+function deleteTeam(id, name) {
+  if (!confirm("Delete team \"" + name + "\"? This cannot be undone.")) return;
+  adminFetch("/admin/api/teams/" + id, { method: "DELETE" })
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (d.ok) { showToast("Team deleted."); loadTeams(); } })
+    .catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error", true); });
+}
+
+function openEdit(id, name, color, emoji) {
+  document.getElementById("edit-id").value = id;
+  document.getElementById("edit-name").value = name;
+  document.getElementById("edit-color").value = color;
+  document.getElementById("edit-emoji").value = emoji;
+  document.getElementById("edit-modal").classList.add("open");
+}
+
+function closeEditModal() { document.getElementById("edit-modal").classList.remove("open"); }
+
+function saveEdit() {
+  var id = document.getElementById("edit-id").value;
+  var name = document.getElementById("edit-name").value.trim();
+  var color = document.getElementById("edit-color").value;
+  var emoji = document.getElementById("edit-emoji").value.trim() || "🏅";
+  if (!name) { showToast("Name required", true); return; }
+  adminFetch("/admin/api/teams/" + id, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: name, color: color, emoji: emoji })
+  }).then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) { closeEditModal(); showToast("Team updated!"); loadTeams(); }
+      else { showToast(d.error || "Error", true); }
+    }).catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error", true); });
+}
+
+// ---- Avatar Upload ----
+function uploadAvatar(input) {
+  if (input.files && input.files[0]) {
+    var formData = new FormData();
+    formData.append("file", input.files[0]);
+    
+    adminFetch("/admin/api/upload-avatar", {
+      method: "POST",
+      body: formData
+    }).then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.url) {
+          document.getElementById("new-avatar-url").value = data.url;
+          document.getElementById("avatar-preview").src = data.url;
+          document.getElementById("avatar-preview").style.display = "inline-block";
+        } else {
+          showToast(data.error || "Upload failed", true);
+        }
+      }).catch(function() { showToast("Upload error", true); });
+  }
+}
+
+// ---- STANDINGS ----
+function loadStandings() {
+  adminFetch("/admin/api/teams")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var teams = (data.teams || []).sort(function(a,b) { return (b.weekly_score||0)-(a.weekly_score||0); });
+      document.getElementById("standings-week").textContent = "Week: " + (data.week || "");
+      
+      // Show winner celebration
+      var winnerBanner = document.getElementById("winner-banner");
+      if (data.winner && data.winner.score > 0) {
+        document.getElementById("winner-name").textContent = data.winner.emoji + " " + data.winner.name + " - Week " + data.week + " Champion!";
+        document.getElementById("winner-score").textContent = data.winner.score + " points";
+        winnerBanner.style.display = "block";
+        // Trigger confetti
+        if (window.triggerConfetti) window.triggerConfetti();
+      } else {
+        winnerBanner.style.display = "none";
+      }
+      
+      var medals = ["🥇","🥈","🥉"];
+      var rankClasses = ["rank-1","rank-2","rank-3"];
+      var el = document.getElementById("standings-podium");
+      if (teams.length === 0) { el.innerHTML = '<div class="empty">No teams yet.</div>'; return; }
+      el.innerHTML = "";
+
+      // Fetch members for all teams in parallel
+      var memberFetches = teams.map(function(t) {
+        return fetch("/api/team-members?team_id=" + encodeURIComponent(t.id))
+          .then(function(r) { return r.json(); })
+          .catch(function() { return {members:[]}; });
+      });
+
+      Promise.all(memberFetches).then(function(memberResults) {
+        teams.forEach(function(t, i) {
+          var members = (memberResults[i] && memberResults[i].members) || [];
+          var playedCount = members.filter(function(m) { return (m.best_score||0) > 0; }).length;
+          var row = document.createElement("div");
+          row.className = "podium-row " + (rankClasses[i] || "");
+          row.style.cursor = "pointer";
+          row.style.flexWrap = "wrap";
+          var membersId = "standings-members-" + i;
+          row.onclick = function() {
+            var mEl = document.getElementById(membersId);
+            if (mEl) mEl.style.display = mEl.style.display === "none" ? "block" : "none";
+          };
+          
+          // Use avatar if available, otherwise emoji
+          var avatarHtml = t.avatar_url ? 
+            '<img src="' + t.avatar_url + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover" />' :
+            (t.emoji||"🏅");
+          
+          row.innerHTML =
+            '<div class="podium-rank">' + (i < 3 ? medals[i] : (i+1)+".") + '</div>' +
+            '<div class="podium-dot" style="background:' + t.color + '"></div>' +
+            '<div class="podium-name">' + avatarHtml + ' ' + escHtml(t.name) + '</div>' +
+            '<div class="podium-pts">' + (t.weekly_score||0) + '</div>' +
+            '<div class="podium-games">pts · ' + playedCount + '/' + (t.member_count||members.length) + ' played ▾</div>' +
+            '<div id="' + membersId + '" style="display:none;width:100%;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1)">' +
+              renderStandingsMembers(members) +
+            '</div>';
+          el.appendChild(row);
+        });
+      });
+      
+      // Check for auto-backup
+      checkAutoBackup();
+    });
+}
+
+function checkAutoBackup() {
+  adminFetch("/admin/api/auto-backup-check", { method: "POST" })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok && data.auto) {
+        showToast("🎯 Auto-backup completed for Week " + data.week + "!");
+      }
+    }).catch(function() { /* Ignore */ });
+}
+
+function renderStandingsMembers(members) {
+  if (members.length === 0) return '<div style="color:rgba(255,255,255,0.3);font-size:12px">No members</div>';
+  var medals = ["🥇","🥈","🥉"];
+  var html = '<table style="width:100%;font-size:13px;border-collapse:collapse">';
+  html += '<tr style="color:rgba(255,255,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:0.05em"><th style="text-align:left;padding:4px 8px">#</th><th style="text-align:left;padding:4px 8px">Player</th><th style="text-align:right;padding:4px 8px">Best Score</th><th style="text-align:right;padding:4px 8px">Games</th><th style="text-align:right;padding:4px 8px">Streak</th></tr>';
+  members.forEach(function(m, i) {
+    var rank = i < 3 ? medals[i] : (i+1)+".";
+    var scoreColor = (m.best_score||0) > 0 ? "#fbbf24" : "rgba(255,255,255,0.25)";
+    html += '<tr style="border-top:1px solid rgba(255,255,255,0.05)">';
+    html += '<td style="padding:6px 8px">' + rank + '</td>';
+    html += '<td style="padding:6px 8px;font-weight:700">' + escHtml(m.name) + '</td>';
+    html += '<td style="padding:6px 8px;text-align:right;font-weight:900;color:' + scoreColor + '">' + (m.best_score||0) + '</td>';
+    html += '<td style="padding:6px 8px;text-align:right;color:rgba(255,255,255,0.4)">' + (m.total_games||0) + '</td>';
+    html += '<td style="padding:6px 8px;text-align:right;color:rgba(255,255,255,0.4)">🔥 ' + (m.best_streak||0) + '</td>';
+    html += '</tr>';
+  });
+  html += '</table>';
+  return html;
+}
+
+function saveWeekSnapshot() {
+  if (!confirm("Save current week's results to history? This creates a permanent record.")) return;
+  adminFetch("/admin/api/save-week-snapshot", { method: "POST" })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) { showToast("Week " + d.week + " saved to history!"); loadHistory(); }
+      else { showToast(d.error || "Error", true); }
+    }).catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error", true); });
+}
+
+function confirmReset() {
+  if (!confirm("Reset ALL team scores for the current week? This cannot be undone.")) return;
+  adminFetch("/admin/api/reset-week", { method: "POST" })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) { showToast("Week scores reset!"); loadStandings(); }
+      else { showToast("Error", true); }
+    }).catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error", true); });
+}
+
+// ---- HISTORY ----
+function loadHistory() {
+  adminFetch("/admin/api/all-scores")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var history = data.history || {};
+      var el = document.getElementById("history-list");
+      var weeks = Object.keys(history).sort().reverse();
+      if (weeks.length === 0) { el.innerHTML = '<div class="empty">No history yet.</div>'; return; }
+      el.innerHTML = "";
+      var medals = ["🥇","🥈","🥉"];
+      // Mark the most recent week as current
+      var currentWeek = weeks.length > 0 ? weeks[0] : "";
+      weeks.forEach(function(week) {
+        var div = document.createElement("div");
+        div.className = "history-week";
+        var label = document.createElement("div");
+        label.className = "history-week-label";
+        label.textContent = (week === currentWeek ? "📍 " : "") + week;
+        div.appendChild(label);
+        var teams = history[week];
+        var totalGames = teams.reduce(function(s,t) { return s + (t.games_played||0); }, 0);
+        var totalPts = teams.reduce(function(s,t) { return s + (t.weekly_score||0); }, 0);
+        if (totalGames > 0) {
+          var summary = document.createElement("div");
+          summary.style.cssText = "font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:8px";
+          summary.textContent = teams.length + " teams · " + totalGames + " total games · " + totalPts + " total pts";
+          div.appendChild(summary);
+        }
+        teams.forEach(function(t, i) {
+          var row = document.createElement("div");
+          row.className = "history-row" + (i === 0 && t.weekly_score > 0 ? " history-winner" : "");
+          row.innerHTML =
+            '<div class="history-rank">' + (i < 3 ? medals[i] : (i+1)+".") + '</div>' +
+            '<div style="font-size:18px;flex-shrink:0">' + (t.emoji||"🏅") + '</div>' +
+            '<div class="history-dot" style="background:' + (t.color||"#f59e0b") + '"></div>' +
+            '<div class="history-name">' + escHtml(t.team_name) + '</div>' +
+            '<div class="history-pts">' + (t.weekly_score||0) + ' pts</div>' +
+            '<div style="font-size:12px;color:rgba(255,255,255,0.3);margin-left:6px">' + (t.games_played||0) + ' games</div>';
+          div.appendChild(row);
+        });
+        el.appendChild(div);
+      });
+    }).catch(function() { document.getElementById("history-list").innerHTML = '<div class="empty">Error loading history.</div>'; });
+}
+
+function loadRankedHistory() {
+  adminFetch("/admin/api/ranked-scores-history")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var el = document.getElementById("ranked-history-list");
+      if (!data.ok) {
+        el.innerHTML = '<div class="empty">Error: ' + (data.error || 'Unknown error') + '</div>';
+        return;
+      }
+      var weeks = data.weeks || {};
+      var weekKeys = Object.keys(weeks).sort().reverse();
+      if (weekKeys.length === 0) { 
+        el.innerHTML = '<div class="empty">No ranked scores yet.</div>'; 
+        return; 
+      }
+      el.innerHTML = "";
+      var medals = ["🥇","🥈","🥉"];
+      var currentWeek = weekKeys.length > 0 ? weekKeys[0] : "";
+      weekKeys.forEach(function(week) {
+        var weekData = weeks[week];
+        var div = document.createElement("div");
+        div.className = "history-week";
+        var label = document.createElement("div");
+        label.className = "history-week-label";
+        label.textContent = (week === currentWeek ? "📍 " : "") + week;
+        div.appendChild(label);
+        
+        // Show summary
+        var individuals = weekData.individuals || [];
+        var teams = weekData.teams || [];
+        var summary = document.createElement("div");
+        summary.style.cssText = "font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:12px";
+        var summaryText = individuals.length + " players";
+        if (teams.length > 0) {
+          summaryText += " · " + teams.length + " teams";
+        }
+        if (individuals.length > 0) {
+          summaryText += " · Top score: " + individuals[0].score + " pts";
+        }
+        summary.textContent = summaryText;
+        div.appendChild(summary);
+        
+        // Show team rankings first (if any teams)
+        if (teams.length > 0) {
+          var teamLabel = document.createElement("div");
+          teamLabel.style.cssText = "font-size:13px;font-weight:700;color:#f59e0b;margin:16px 0 8px 0";
+          teamLabel.textContent = "🏆 Team Rankings";
+          div.appendChild(teamLabel);
+          
+          teams.forEach(function(team, i) {
+            var teamDiv = document.createElement("div");
+            teamDiv.style.cssText = "background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.1)";
+            teamDiv.innerHTML =
+              '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
+                '<div style="font-size:16px;width:24px;text-align:center">' + (i < 3 ? medals[i] : (i+1)+".") + '</div>' +
+                '<div style="font-size:20px">👥</div>' +
+                '<div style="flex:1;font-weight:800">' + escHtml(team.team_name) + '</div>' +
+                '<div style="font-size:16px;font-weight:900;color:#f59e0b">' + team.total_score + ' pts</div>' +
+                '<div style="font-size:11px;color:rgba(255,255,255,0.3)">' + team.player_count + ' players</div>' +
+              '</div>' +
+              '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-left:34px">';
+            
+            team.players.forEach(function(player) {
+              teamDiv.innerHTML += 
+                '<span style="background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:12px;font-size:11px">' +
+                  escHtml(player.name) + ' (' + player.score + ')' +
+                '</span>';
+            });
+            
+            teamDiv.innerHTML += '</div>';
+            div.appendChild(teamDiv);
+          });
+        }
+        
+        // Show individual rankings
+        if (individuals.length > 0) {
+          var indivLabel = document.createElement("div");
+          indivLabel.style.cssText = "font-size:13px;font-weight:700;color:#f59e0b;margin:16px 0 8px 0";
+          indivLabel.textContent = "🎮 Individual Rankings";
+          div.appendChild(indivLabel);
+          
+          individuals.forEach(function(p, i) {
+            var row = document.createElement("div");
+            row.className = "history-row" + (i === 0 ? " history-winner" : "");
+            row.innerHTML =
+              '<div class="history-rank">' + (i < 3 ? medals[i] : (i+1)+".") + '</div>' +
+              '<div style="font-size:18px;flex-shrink:0">' + (p.team_name ? "👥" : "🎮") + '</div>' +
+              '<div class="history-name">' + escHtml(p.name) + '</div>' +
+              '<div class="history-pts">' + p.score + ' pts</div>' +
+              (p.team_name ? '<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-left:6px">' + escHtml(p.team_name) + '</div>' : '');
+            div.appendChild(row);
+          });
+        }
+        
+        el.appendChild(div);
+      });
+    }).catch(function() { 
+      document.getElementById("ranked-history-list").innerHTML = '<div class="empty">Error loading ranked history.</div>'; 
+    });
+}
+
+function escHtml(str) {
+  var d = document.createElement("div");
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ---- PLAYERS ----
+var allPlayers = [];
+var allTeamsCache = [];
+var _assigningPlayer = "";
+
+function loadPlayers() {
+  adminFetch("/admin/api/players")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      allPlayers = (data.players || []).sort(function(a, b) {
+        return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+      });
+      document.getElementById("player-count").textContent = "(" + allPlayers.length + ")";
+      renderPlayers(allPlayers);
+      // Also load teams for bulk assign dropdown
+      loadTeamsForSelect();
+    })
+    .catch(function(e) { if (e.message !== 'Unauthorized') document.getElementById("players-list").innerHTML = '<div class="empty">Error loading players.</div>'; });
+}
+
+function loadTeamsForSelect() {
+  adminFetch("/admin/api/teams")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      allTeamsCache = data.teams || [];
+      var sel = document.getElementById("bulk-team-select");
+      sel.innerHTML = '<option value="">-- Select Team --</option>';
+      allTeamsCache.forEach(function(t) {
+        sel.innerHTML += '<option value="' + t.id + '" data-name="' + escHtml(t.name) + '" data-color="' + t.color + '">' + (t.emoji||"🏅") + ' ' + escHtml(t.name) + '</option>';
+      });
+    });
+}
+
+function renderPlayers(players) {
+  var el = document.getElementById("players-list");
+  if (players.length === 0) { el.innerHTML = '<div class="empty">No players found.</div>'; return; }
+  el.innerHTML = "";
+  players.forEach(function(p) {
+    var row = document.createElement("div");
+    row.className = "player-row";
+    row.setAttribute("data-name", p.name);
+    var teamHtml = p.team_name
+      ? '<span class="player-team-badge" style="background:' + (p.team_color||"#f59e0b") + '22;color:' + (p.team_color||"#f59e0b") + ';border:1px solid ' + (p.team_color||"#f59e0b") + '44">' + escHtml(p.team_name) + '</span>'
+      : '<span class="player-team-none">No team</span>';
+    row.innerHTML =
+      '<input type="checkbox" class="player-check" data-player="' + escHtml(p.name) + '" />' +
+      '<div class="player-avatar">' + (p.avatar || "👤") + '</div>' +
+      '<div class="player-info">' +
+        '<div class="player-name">' + escHtml(p.name) + '</div>' +
+        '<div class="player-meta">' + teamHtml +
+          '<span>' + (p.has_pin ? "🔒 PIN set" : "🔓 No PIN") + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="player-stats">' +
+        '<div class="player-stat">' + (p.total_games||0) + ' games</div>' +
+        '<div class="player-stat ranked">🏆 ' + (p.ranked_best||0) + '</div>' +
+        '<div class="player-stat">' + p.ranked_attempts_left + '/3 left</div>' +
+      '</div>' +
+      '<div class="player-actions">' +
+        '<button class="btn btn-sm btn-edit" onclick="openAssignTeam(\'' + escHtml(p.name) + '\')">🏅 Team</button>' +
+        '<button class="btn btn-sm btn-edit" onclick="showPlayerHistory(\'' + escHtml(p.name) + '\')">📊 History</button>' +
+        '<button class="btn btn-sm btn-edit" onclick="openRenameModal(\'' + escHtml(p.name) + '\')">✏️ Rename</button>' +
+        '<button class="btn btn-sm btn-gray" onclick="resetPlayerPin(\'' + escHtml(p.name) + '\')">🔑 PIN</button>' +
+        '<button class="btn btn-sm btn-gray" onclick="resetPlayerAttempts(\'' + escHtml(p.name) + '\')">🔄 Attempts</button>' +
+        '<button class="btn btn-sm btn-danger" onclick="deletePlayer(\'' + escHtml(p.name) + '\')">🗑️</button>' +
+      '</div>';
+    el.appendChild(row);
+  });
+}
+
+function filterPlayers() {
+  var q = document.getElementById("player-search").value.toLowerCase().trim();
+  if (!q) { renderPlayers(allPlayers); return; }
+  renderPlayers(allPlayers.filter(function(p) {
+    return p.name.toLowerCase().indexOf(q) !== -1 || (p.team_name||"").toLowerCase().indexOf(q) !== -1;
+  }));
+}
+
+function deletePlayer(name) {
+  if (!confirm("Permanently delete player \"" + name + "\" and all their data?")) return;
+  adminFetch("/admin/api/players/" + encodeURIComponent(name), { method: "DELETE" })
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (d.ok) { showToast("Player deleted."); loadPlayers(); } else showToast(d.error||"Error", true); })
+    .catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error", true); });
+}
+
+function resetPlayerPin(name) {
+  if (!confirm("Reset PIN for \"" + name + "\"? They will set a new PIN on next login.")) return;
+  adminFetch("/admin/api/players/" + encodeURIComponent(name) + "/reset-pin", { method: "POST" })
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (d.ok) { showToast("PIN reset for " + name); loadPlayers(); } else showToast(d.error||"Error", true); })
+    .catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error", true); });
+}
+
+function resetPlayerAttempts(name) {
+  if (!confirm("Reset ranked attempts for \"" + name + "\"?")) return;
+  adminFetch("/admin/api/players/" + encodeURIComponent(name) + "/reset-attempts", { method: "POST" })
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (d.ok) { showToast("Attempts reset for " + name); loadPlayers(); } else showToast(d.error||"Error", true); })
+    .catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error", true); });
+}
+
+// Assign team modal
+function openAssignTeam(name) {
+  _assigningPlayer = name;
+  document.getElementById("assign-player-name").textContent = name;
+  var list = document.getElementById("assign-team-list");
+  list.innerHTML = "";
+  allTeamsCache.forEach(function(t) {
+    var opt = document.createElement("div");
+    opt.className = "assign-team-option";
+    opt.innerHTML = '<div class="team-dot" style="background:' + t.color + '"></div>' +
+      '<div class="team-emoji">' + (t.emoji||"🏅") + '</div>' +
+      '<div style="flex:1;font-weight:700">' + escHtml(t.name) + '</div>';
+    opt.onclick = function() { assignPlayerToTeam(name, t.id, t.name, t.color); };
+    list.appendChild(opt);
+  });
+  if (allTeamsCache.length === 0) list.innerHTML = '<div class="empty">No teams created yet.</div>';
+  document.getElementById("assign-modal").classList.add("open");
+}
+
+function closeAssignModal() { document.getElementById("assign-modal").classList.remove("open"); }
+
+function assignPlayerToTeam(name, teamId, teamName, teamColor) {
+  adminFetch("/admin/api/players/" + encodeURIComponent(name) + "/team", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ team_id: teamId, team_name: teamName, team_color: teamColor })
+  }).then(function(r) { return r.json(); })
+    .then(function(d) { if (d.ok) { closeAssignModal(); showToast(name + " → " + teamName); loadPlayers(); } })
+    .catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error", true); });
+}
+
+function unassignPlayer() {
+  adminFetch("/admin/api/players/" + encodeURIComponent(_assigningPlayer) + "/team", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ team_id: "" })
+  }).then(function(r) { return r.json(); })
+    .then(function(d) { if (d.ok) { closeAssignModal(); showToast(_assigningPlayer + " removed from team"); loadPlayers(); } })
+    .catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error", true); });
+}
+
+// Bulk actions
+function selectAllPlayers() {
+  document.querySelectorAll(".player-check").forEach(function(c) { c.checked = true; c.closest(".player-row").classList.add("selected"); });
+}
+function deselectAllPlayers() {
+  document.querySelectorAll(".player-check").forEach(function(c) { c.checked = false; c.closest(".player-row").classList.remove("selected"); });
+}
+
+function getSelectedPlayers() {
+  var names = [];
+  document.querySelectorAll(".player-check:checked").forEach(function(c) { names.push(c.getAttribute("data-player")); });
+  return names;
+}
+
+function bulkAssignSelected() {
+  var sel = document.getElementById("bulk-team-select");
+  var opt = sel.options[sel.selectedIndex];
+  if (!sel.value) { showToast("Select a team first", true); return; }
+  var players = getSelectedPlayers();
+  if (players.length === 0) { showToast("Select players first", true); return; }
+  if (!confirm("Assign " + players.length + " player(s) to " + opt.textContent.trim() + "?")) return;
+  adminFetch("/admin/api/players/bulk-assign-team", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ players: players, team_id: sel.value, team_name: opt.getAttribute("data-name"), team_color: opt.getAttribute("data-color") })
+  }).then(function(r) { return r.json(); })
+    .then(function(d) { if (d.ok) { showToast(d.count + " players assigned!"); loadPlayers(); } else showToast(d.error||"Error", true); })
+    .catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error", true); });
+}
+
+function resetGroupScores(groupName) {
+  if (!confirm("⚠️ WARNING: This will permanently delete ALL scores for " + groupName.toUpperCase() + " and reset ranked attempts to 3. This action cannot be undone. Are you sure you want to continue?")) {
+    return;
+  }
+  
+  if (!confirm("🚨 FINAL WARNING: All player scores, team scores, and leaderboard data for " + groupName.toUpperCase() + " will be erased. Click OK to proceed with the reset.")) {
+    return;
+  }
+  
+  adminFetch("/admin/api/reset-group-scores/" + encodeURIComponent(groupName), { method: "POST" })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        showToast("✅ " + data.message);
+        // Refresh all data
+        loadTeams();
+        loadHistory();
+        if (currentTab === "players") {
+          loadPlayers();
+        }
+      } else {
+        showToast("❌ " + (data.error || "Failed to reset " + groupName + " scores"), true);
+      }
+    })
+    .catch(function(e) {
+      if (e.message !== 'Unauthorized') {
+        showToast("❌ Error resetting " + groupName + " scores", true);
+      }
+    });
+}
+
+function resetWeekScores() {
+  if (!confirm("⚠️ WARNING: This will permanently delete ALL scores for the current week and reset ranked attempts to 3. This action cannot be undone. Are you sure you want to continue?")) {
+    return;
+  }
+  
+  if (!confirm("🚨 FINAL WARNING: All player scores, team scores, and leaderboard data for this week will be erased. Click OK to proceed with the reset.")) {
+    return;
+  }
+  
+  adminFetch("/admin/api/reset-week-scores", { method: "POST" })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        showToast("✅ " + data.message);
+        // Refresh all data
+        loadTeams();
+        loadHistory();
+        if (currentTab === "players") {
+          loadPlayers();
+        }
+      } else {
+        showToast("❌ " + (data.error || "Failed to reset scores"), true);
+      }
+    })
+    .catch(function(e) {
+      if (e.message !== 'Unauthorized') {
+        showToast("❌ Error resetting scores", true);
+      }
+    });
+}
+
+function bulkResetAttempts() {
+  if (!confirm("Reset ranked attempts for ALL players this week?")) return;
+  adminFetch("/admin/api/players/bulk-reset-attempts", { method: "POST" })
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (d.ok) { showToast("All ranked attempts reset."); loadPlayers(); } else showToast(d.error||"Error", true); })
+    .catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error", true); });
+}
+
+function saveWeekSnapshot() {
+  if (!confirm("Save current week's scores to history? This preserves all leaderboard and team data.")) return;
+  adminFetch("/admin/api/save-week-snapshot", { method: "POST" })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) {
+        showToast("✅ Week " + d.week + " saved to history");
+        loadWeekHistory();
+      } else {
+        showToast("❌ " + (d.error || "Failed to save"), true);
+      }
+    })
+    .catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error saving snapshot", true); });
+}
+
+function loadWeekHistory() {
+  adminFetch("/admin/api/week-history")
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok && d.weeks) {
+        renderWeekHistory(d.weeks);
+      } else {
+        renderWeekHistory([]);
+      }
+    })
+    .catch(function(e) {
+      if (e.message !== 'Unauthorized') {
+        console.error("Error loading week history", e);
+        renderWeekHistory([]);
+      }
+    });
+}
+
+function renderWeekHistory(weeks) {
+  var historyList = document.getElementById("history-list");
+  if (!weeks || weeks.length === 0) {
+    historyList.innerHTML = '<div class="empty">No archived weeks yet. Save a snapshot to get started.</div>';
+    return;
+  }
+  
+  var html = '';
+  weeks.forEach(function(w) {
+    var archivedDate = w.archived_at ? new Date(w.archived_at * 1000).toLocaleString() : 'Unknown';
+    html += '<div class="history-week">';
+    html += '<div class="history-week-label">📅 Week ' + w.week + ' <span style="font-size:11px;color:rgba(255,255,255,0.5);">(' + archivedDate + ')</span></div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px">';
+    html += '<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;border:1px solid rgba(255,255,255,0.08)">';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,0.5)">Teams</div>';
+    html += '<div style="font-size:20px;font-weight:900;color:#f59e0b">' + w.team_count + '</div>';
+    html += '</div>';
+    html += '<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;border:1px solid rgba(255,255,255,0.08)">';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,0.5)">Easy</div>';
+    html += '<div style="font-size:20px;font-weight:900;color:#10b981">' + w.easy_entries + '</div>';
+    html += '</div>';
+    html += '<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;border:1px solid rgba(255,255,255,0.08)">';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,0.5)">Medium</div>';
+    html += '<div style="font-size:20px;font-weight:900;color:#f59e0b">' + w.medium_entries + '</div>';
+    html += '</div>';
+    html += '<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;border:1px solid rgba(255,255,255,0.08)">';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,0.5)">Hard</div>';
+    html += '<div style="font-size:20px;font-weight:900;color:#ef4444">' + w.hard_entries + '</div>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+  });
+  historyList.innerHTML = html;
+}
+
+function bulkDeleteUnteamed() {
+  var unteamed = allPlayers.filter(function(p) { return !p.team_id; });
+  if (unteamed.length === 0) { showToast("All players have teams!", false); return; }
+  if (!confirm("Delete " + unteamed.length + " player(s) without a team? This cannot be undone!")) return;
+  var promises = unteamed.map(function(p) {
+    return adminFetch("/admin/api/players/" + encodeURIComponent(p.name), { method: "DELETE" }).then(function(r) { return r.json(); });
+  });
+  Promise.all(promises).then(function() { showToast(unteamed.length + " players deleted."); loadPlayers(); })
+    .catch(function() { showToast("Error", true); loadPlayers(); });
+}
+
+// Toggle selection on checkbox click
+document.addEventListener("change", function(e) {
+  if (e.target.classList.contains("player-check")) {
+    var row = e.target.closest(".player-row");
+    if (row) row.classList.toggle("selected", e.target.checked);
+  }
+});
+
+// ---- RENAME PLAYER ----
+var _renamingPlayer = "";
+
+function openRenameModal(name) {
+  _renamingPlayer = name;
+  document.getElementById("rename-old-name").textContent = name;
+  document.getElementById("rename-new-name").value = name;
+  document.getElementById("rename-modal").classList.add("open");
+  setTimeout(function() { document.getElementById("rename-new-name").focus(); }, 100);
+}
+
+function closeRenameModal() { document.getElementById("rename-modal").classList.remove("open"); }
+
+function confirmRename() {
+  var newName = document.getElementById("rename-new-name").value.trim();
+  if (!newName) { showToast("Enter a new name", true); return; }
+  if (newName === _renamingPlayer) { closeRenameModal(); return; }
+  adminFetch("/admin/api/players/" + encodeURIComponent(_renamingPlayer) + "/rename", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ new_name: newName })
+  }).then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) {
+        closeRenameModal();
+        showToast('"' + _renamingPlayer + '" renamed to "' + newName + '"');
+        loadPlayers();
+        loadTeams();
+      } else { showToast(d.error || "Error", true); }
+    }).catch(function(e) { if (e.message !== 'Unauthorized') showToast("Error renaming", true); });
+}
+
+// Close modals on outside click
+document.getElementById("edit-modal").addEventListener("click", function(e) {
+  if (e.target === this) closeEditModal();
+});
+document.getElementById("assign-modal").addEventListener("click", function(e) {
+  if (e.target === this) closeAssignModal();
+});
+document.getElementById("rename-modal").addEventListener("click", function(e) {
+  if (e.target === this) closeRenameModal();
+});
+
+// Logout clears stored password
+document.querySelector('form[action="/admin/logout"]') && document.querySelector('form[action="/admin/logout"]').addEventListener('submit', function(e) {
+  e.preventDefault();
+  localStorage.removeItem('admin_pw');
+  window.location.href = '/admin/login';
+});
+
+// Player History Functions
+function showPlayerHistory(playerName) {
+  document.getElementById('history-player-name').textContent = playerName;
+  document.getElementById('history-modal').style.display = 'flex';
+  
+  adminFetch("/admin/api/players/" + encodeURIComponent(playerName) + "/history")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      renderPlayerHistory(data);
+    })
+    .catch(function(e) {
+      if (e.message !== 'Unauthorized') {
+        document.getElementById('history-content').innerHTML = 
+          '<div style="text-align: center; padding: 20px; color: #f87171;">Error loading history</div>';
+      }
+    });
+}
+
+function closeHistoryModal() {
+  document.getElementById('history-modal').style.display = 'none';
+}
+
+function renderPlayerHistory(data) {
+  var content = document.getElementById('history-content');
+  var profile = data.profile || {};
+  var scores = data.scores || {};
+  var attempts = data.attempts || [];
+  
+  var html = '';
+  
+  // Profile info
+  html += '<div class="card" style="margin-bottom: 16px;">';
+  html += '<h4 style="color: #f59e0b; margin-bottom: 12px;">👤 Player Profile</h4>';
+  html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">';
+  html += '<div><strong>Total Games:</strong> ' + (profile.total_games || 0) + '</div>';
+  html += '<div><strong>Best Score:</strong> ' + (profile.ranked_best || 0) + '</div>';
+  html += '<div><strong>Best Streak:</strong> ' + (profile.best_streak || 0) + '</div>';
+  html += '<div><strong>Team:</strong> ' + (profile.team_name || 'No team') + '</div>';
+  html += '</div>';
+  html += '</div>';
+  
+  // Recent scores by difficulty
+  var difficulties = ['easy', 'medium', 'hard'];
+  var difficultyLabels = {'easy': '🟢 Easy', 'medium': '🟡 Medium', 'hard': '🔴 Hard'};
+  
+  difficulties.forEach(function(diff) {
+    var diffScores = scores[diff] || [];
+    if (diffScores.length > 0) {
+      html += '<div class="card" style="margin-bottom: 16px;">';
+      html += '<h4 style="color: #f59e0b; margin-bottom: 12px;">' + difficultyLabels[diff] + ' - Recent Games</h4>';
+      html += '<div style="max-height: 200px; overflow-y: auto;">';
+      diffScores.slice(0, 10).forEach(function(score, i) {
+        var date = score.timestamp ? new Date(score.timestamp * 1000).toLocaleString() : 'Unknown';
+        var week = score.week || 'N/A';
+        html += '<div style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">';
+        html += '<div style="display: flex; justify-content: space-between; align-items: center;">';
+        html += '<div><strong>' + score.score + ' pts</strong> - Week ' + week + '</div>';
+        html += '<div style="font-size: 11px; color: rgba(255,255,255,0.5);">' + date + '</div>';
+        html += '</div>';
+        if (score.words_missed) {
+          html += '<div style="font-size: 12px; color: #f87171; margin-top: 4px;">Missed: ' + score.words_missed.join(', ') + '</div>';
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+      if (diffScores.length > 10) {
+        html += '<div style="text-align: center; padding: 8px; color: rgba(255,255,255,0.5); font-size: 12px;">';
+        html += 'Showing 10 of ' + diffScores.length + ' games';
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+  });
+  
+  // Ranked attempts
+  if (attempts.length > 0) {
+    html += '<div class="card" style="margin-bottom: 16px;">';
+    html += '<h4 style="color: #f59e0b; margin-bottom: 12px;">🏆 Ranked Attempts</h4>';
+    html += '<div style="max-height: 150px; overflow-y: auto;">';
+    attempts.forEach(function(attempt) {
+      var week = attempt.week || 'Unknown';
+      var attemptsLeft = attempt.attempts || 0;
+      var date = attempt.timestamp ? new Date(attempt.timestamp * 1000).toLocaleString() : 'Unknown';
+      html += '<div style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">';
+      html += '<div style="display: flex; justify-content: space-between; align-items: center;">';
+      html += '<div>Week ' + week + ' - ' + attemptsLeft + '/3 attempts left</div>';
+      html += '<div style="font-size: 11px; color: rgba(255,255,255,0.5);">' + date + '</div>';
+      html += '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '</div>';
+  }
+  
+  if (html === '') {
+    html = '<div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5);">';
+    html += 'No history available for this player.';
+    html += '</div>';
+  }
+  
+  content.innerHTML = html;
+}
+
+// Modal close handlers
+document.getElementById("history-modal").addEventListener("click", function(e) {
+  if (e.target === this) closeHistoryModal();
+});
+
+// Initial load
+loadTeams();
+loadWeekHistory();
+</script>
+</body>
+</html>

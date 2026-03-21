@@ -1,0 +1,85 @@
+<svg viewBox="0 0 140 240" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @keyframes wingFlap {
+        0%, 100% { transform: rotateZ(0deg); }
+        50% { transform: rotateZ(30deg); }
+      }
+      @keyframes flight {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(8px); }
+      }
+      .wings { animation: wingFlap 0.35s ease-in-out infinite; transform-origin: 70px 95px; }
+      .bee-body { animation: flight 2.5s ease-in-out infinite; }
+    </style>
+    <radialGradient id="bodyGrad" cx="35%" cy="35%">
+      <stop offset="0%" style="stop-color:#FFED4E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFC107;stop-opacity:1" />
+    </radialGradient>
+    <radialGradient id="headGrad" cx="40%" cy="40%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Animated flight group -->
+  <g class="bee-body">
+    <!-- Wings group with flapping animation -->
+    <g class="wings">
+      <!-- Top Wing -->
+      <ellipse cx="55" cy="95" rx="35" ry="28" fill="rgba(173,216,230,0.6)" stroke="rgba(100,150,255,0.8)" stroke-width="2" opacity="0.85" />
+      <!-- Bottom Wing -->
+      <ellipse cx="85" cy="95" rx="35" ry="28" fill="rgba(173,216,230,0.6)" stroke="rgba(100,150,255,0.8)" stroke-width="2" opacity="0.85" />
+    </g>
+    
+    <!-- Head (round and chubby) -->
+    <circle cx="70" cy="30" r="18" fill="url(#headGrad)" />
+    
+    <!-- Big chubby body segments -->
+    <!-- Front segment -->
+    <ellipse cx="70" cy="65" rx="28" ry="22" fill="url(#bodyGrad)" />
+    
+    <!-- Middle segment -->
+    <ellipse cx="70" cy="110" rx="30" ry="24" fill="url(#bodyGrad)" />
+    
+    <!-- Back segment (abdomen) -->
+    <ellipse cx="70" cy="150" rx="26" ry="20" fill="url(#bodyGrad)" />
+    
+    <!-- Black stripes -->
+    <ellipse cx="70" cy="50" rx="28" ry="8" fill="#333333" opacity="0.75" />
+    <ellipse cx="70" cy="80" rx="30" ry="8" fill="#333333" opacity="0.75" />
+    <ellipse cx="70" cy="125" rx="30" ry="8" fill="#333333" opacity="0.75" />
+    <ellipse cx="70" cy="165" rx="26" ry="6" fill="#333333" opacity="0.75" />
+    
+    <!-- Eyes (big and expressive) -->
+    <circle cx="62" cy="22" r="6" fill="#000000" />
+    <circle cx="62" cy="38" r="6" fill="#000000" />
+    <circle cx="60" cy="24" r="2.5" fill="#ffffff" />
+    <circle cx="60" cy="40" r="2.5" fill="#ffffff" />
+    
+    <!-- Happy smile -->
+    <path d="M 75 20 Q 80 30 75 40" stroke="#333333" stroke-width="2" fill="none" stroke-linecap="round" />
+    
+    <!-- Antennae (curved upward) -->
+    <path d="M 55 25 Q 40 20 28 18" stroke="#333333" stroke-width="3" fill="none" stroke-linecap="round" />
+    <path d="M 55 35 Q 40 40 28 42" stroke="#333333" stroke-width="3" fill="none" stroke-linecap="round" />
+    <circle cx="28" cy="18" r="3" fill="#333333" />
+    <circle cx="28" cy="42" r="3" fill="#333333" />
+    
+    <!-- Front legs (right side) -->
+    <line x1="95" y1="50" x2="120" y2="45" stroke="#333333" stroke-width="3" stroke-linecap="round" />
+    <line x1="98" y1="60" x2="125" y2="60" stroke="#333333" stroke-width="3" stroke-linecap="round" />
+    
+    <!-- Middle legs (right side) -->
+    <line x1="100" y1="100" x2="128" y2="95" stroke="#333333" stroke-width="3" stroke-linecap="round" />
+    <line x1="100" y1="120" x2="128" y2="125" stroke="#333333" stroke-width="3" stroke-linecap="round" />
+    
+    <!-- Back legs (right side) -->
+    <line x1="96" y1="140" x2="122" y2="135" stroke="#333333" stroke-width="3" stroke-linecap="round" />
+    <line x1="96" y1="160" x2="122" y2="165" stroke="#333333" stroke-width="3" stroke-linecap="round" />
+    
+    <!-- Stinger (small, at the back) -->
+    <line x1="70" y1="168" x2="70" y2="185" stroke="#FFD700" stroke-width="3" stroke-linecap="round" />
+    <polygon points="70,185 67,195 73,195" fill="#FFD700" />
+  </g>
+</svg>

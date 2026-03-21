@@ -1,0 +1,23 @@
+[
+  {
+    "id": "6d7eefa5-8567-4c19-b60d-bc0431d9068f",
+    "name": "Test Team",
+    "color": "#ef4444",
+    "emoji": "🔴",
+    "member_count": 0
+  },
+  {
+    "id": "217d4c25-6c04-4667-b01a-f97ef8468af6",
+    "name": "Red Team",
+    "color": "#ef4444",
+    "emoji": "🔴",
+    "member_count": 0
+  },
+  {
+    "id": "75f76094-d328-4b81-ba9f-711edecf436c",
+    "name": "Blue Team",
+    "color": "#3b82f6",
+    "emoji": "🔵",
+    "member_count": 0
+  }
+]

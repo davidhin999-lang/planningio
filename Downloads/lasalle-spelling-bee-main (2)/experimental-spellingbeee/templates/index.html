@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Spelling Bee</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="/static/tailwind.output.css?v={{ range(1,99999)|random }}">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v={{ range(1,99999)|random }}">
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <link rel="stylesheet" href="/static/online_duel.css">
+</head>
+<body>
+
+<!-- CONFETTI CANVAS -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- ATMOSPHERE CANVAS -->
+<canvas id="atmo-canvas"></canvas>
+
+<!-- ================= BADGE ACHIEVEMENT POPUP ================= -->
+<div id="badge-popup" class="badge-popup" style="display:none">
+  <div class="badge-popup-content">
+    <div class="badge-popup-icon" id="badge-popup-icon">🏆</div>
+    <div class="badge-popup-title">Badge Earned!</div>
+    <div class="badge-popup-name" id="badge-popup-name"></div>
+    <div class="badge-popup-desc" id="badge-popup-desc"></div>
+    <button class="badge-popup-btn" onclick="closeBadgePopup()">Awesome!</button>
+  </div>
+</div>
+
+<!-- ================= STUDENT PROFILE POPUP ================= -->
+<div id="profile-popup" class="profile-popup" style="display:none">
+  <div class="profile-popup-content">
+    <div class="profile-popup-header">
+      <div class="profile-popup-avatar" id="profile-popup-avatar">👤</div>
+      <div class="profile-popup-info">
+        <div class="profile-popup-name" id="profile-popup-name">Student Name</div>
+        <div class="profile-popup-team" id="profile-popup-team">Team Name</div>
+      </div>
+      <button class="profile-popup-close" onclick="closeProfilePopup()">×</button>
+    </div>
+    
+    <div class="profile-popup-stats">
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="profile-popup-ranked-score">0</div>
+        <div class="profile-stat-label">Ranked Score</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="profile-popup-total-games">0</div>
+        <div class="profile-stat-label">Total Games</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="profile-popup-best-streak">0</div>
+        <div class="profile-stat-label">Best Streak</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="profile-popup-badge-count">0</div>
+        <div class="profile-stat-label">Badges</div>
+      </div>
+    </div>
+    
+    <div class="profile-popup-badges" id="profile-popup-badges">
+      <div class="profile-popup-badges-title">Badges Earned</div>
+      <div class="profile-popup-badges-list" id="profile-popup-badges-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= LOGIN SCREEN ================= -->
+<div id="login-screen" class="screen active screen-enter">
+  <div class="menu-card border-2 border-white/60 bg-white/10 shadow-2xl shadow-violet-900/30 backdrop-blur-sm" style="max-width:380px">
+    <div class="menu-header">
+      <div class="logo-group">
+        <h1 class="logo"><span class="logo-spelling">Spelling</span> <span class="logo-bee">Bee</span></h1>
+        <div class="bee-flight-area">
+          <div id="flying-bee-login" class="flying-bee">🐝</div>
+        </div>
+      </div>
+      <div id="group-label" class="group-label" style="display:none"></div>
+    </div>
+    
+    <!-- Badges Section -->
+    <div id="login-badges" style="margin:20px 0;display:none">
+      <div style="font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:8px">Your Badges</div>
+      <div id="login-badges-list" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+    </div>
+
+    <!-- Step 1: Username -->
+    <div id="login-step-name" class="login-step">
+      <div class="mb-2 text-center text-xs font-bold uppercase tracking-[0.16em] text-violet-200">Pilot Login</div>
+      <input type="text" id="login-name-input" class="name-input border-2 border-white/50 bg-white/90 text-slate-900 placeholder:text-slate-500" placeholder="Enter your username" maxlength="20" autocomplete="off" />
+      <button class="menu-btn primary-btn transition duration-200 hover:-translate-y-0.5" onclick="loginCheckName()" style="width:100%;margin-top:10px">
+        <span class="btn-label">Continue</span>
+      </button>
+      <div id="login-name-error" class="login-error"></div>
+    </div>
+
+    <!-- Step 2: PIN -->
+    <div id="login-step-pin" class="login-step hidden">
+      <div class="login-pin-title text-violet-100" id="login-pin-title">Enter your PIN</div>
+      <div class="login-pin-sub text-violet-200/90" id="login-pin-sub">Welcome back! Enter your 4-digit PIN.</div>
+      <div class="pin-dots" id="login-pin-dots">
+        <div class="pin-dot" id="lpd0"></div>
+        <div class="pin-dot" id="lpd1"></div>
+        <div class="pin-dot" id="lpd2"></div>
+        <div class="pin-dot" id="lpd3"></div>
+      </div>
+      <div class="pin-error" id="login-pin-error"></div>
+      <div class="pin-keypad">
+        <button class="pin-key border-2 border-violet-200/70 bg-white/95 text-slate-900 transition duration-150 hover:bg-violet-50" onclick="loginPinKey('1')">1</button>
+        <button class="pin-key border-2 border-violet-200/70 bg-white/95 text-slate-900 transition duration-150 hover:bg-violet-50" onclick="loginPinKey('2')">2</button>
+        <button class="pin-key border-2 border-violet-200/70 bg-white/95 text-slate-900 transition duration-150 hover:bg-violet-50" onclick="loginPinKey('3')">3</button>
+        <button class="pin-key border-2 border-violet-200/70 bg-white/95 text-slate-900 transition duration-150 hover:bg-violet-50" onclick="loginPinKey('4')">4</button>
+        <button class="pin-key border-2 border-violet-200/70 bg-white/95 text-slate-900 transition duration-150 hover:bg-violet-50" onclick="loginPinKey('5')">5</button>
+        <button class="pin-key border-2 border-violet-200/70 bg-white/95 text-slate-900 transition duration-150 hover:bg-violet-50" onclick="loginPinKey('6')">6</button>
+        <button class="pin-key border-2 border-violet-200/70 bg-white/95 text-slate-900 transition duration-150 hover:bg-violet-50" onclick="loginPinKey('7')">7</button>
+        <button class="pin-key border-2 border-violet-200/70 bg-white/95 text-slate-900 transition duration-150 hover:bg-violet-50" onclick="loginPinKey('8')">8</button>
+        <button class="pin-key border-2 border-violet-200/70 bg-white/95 text-slate-900 transition duration-150 hover:bg-violet-50" onclick="loginPinKey('9')">9</button>
+        <button class="pin-key border-2 border-violet-200/70 bg-white/95 text-slate-900 transition duration-150 hover:bg-violet-50" onclick="loginPinKey('0')" style="grid-column:2">0</button>
+        <button class="pin-key pin-key-del border-2 border-rose-300/70 bg-rose-50/95 text-rose-700 transition duration-150 hover:bg-rose-100" onclick="loginPinDel()">&#9003;</button>
+      </div>
+      <button class="menu-btn secondary-btn border-2 border-white/40 bg-white/20 transition duration-200 hover:bg-white/30" onclick="loginGoBack()" style="width:100%;margin-top:10px">
+        <span class="btn-label">&larr; Different name</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MENU SCREEN ================= -->
+<div id="menu-screen" class="screen">
+  <div class="menu-card">
+    <button id="profile-btn" class="profile-btn" onclick="openProfile()" title="My Profile">&#128100;</button>
+
+    <div class="menu-header">
+      <div class="logo-group">
+        <h1 class="logo"><span class="logo-spelling">Spelling</span> <span class="logo-bee">Bee</span></h1>
+        <div class="bee-flight-area">
+          <div id="flying-bee" class="flying-bee">🐝</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="menu-player-banner" class="menu-player-banner">
+      <span id="menu-player-avatar" class="menu-player-avatar">👤</span>
+      <div class="menu-player-greeting">
+        <span class="menu-player-hello">Welcome back!</span>
+        <span id="menu-player-name" class="menu-player-name"></span>
+      </div>
+    </div>
+
+    <section id="mission-control-lite" class="mc-card mt-3">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 class="font-heading text-base font-bold text-slate-900">Mission Control Lite</h2>
+        <span id="mc-weekly-recap" class="mc-chip border-violet-200 bg-violet-50 text-violet-700">Weekly recap loading</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2 md:grid-cols-4">
+        <div class="mc-stat">
+          <div class="text-xs font-semibold text-slate-500">Total Score</div>
+          <div id="mc-total-score" class="font-heading text-xl font-bold text-slate-900">--</div>
+        </div>
+        <div class="mc-stat">
+          <div class="text-xs font-semibold text-slate-500">Accuracy</div>
+          <div id="mc-accuracy" class="font-heading text-xl font-bold text-slate-900">--</div>
+        </div>
+        <div class="mc-stat">
+          <div class="text-xs font-semibold text-slate-500">Best Streak</div>
+          <div id="mc-best-streak" class="font-heading text-xl font-bold text-slate-900">--</div>
+        </div>
+        <div class="mc-stat">
+          <div class="text-xs font-semibold text-slate-500">Games Played</div>
+          <div id="mc-games-played" class="font-heading text-xl font-bold text-slate-900">--</div>
+        </div>
+      </div>
+      <div class="mt-3 rounded-game border-2 border-emerald-200 bg-emerald-50 p-3">
+        <div class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Daily Challenge</div>
+        <div id="mc-daily-challenge" class="mt-1 text-sm font-semibold text-emerald-900">Complete one round with fewer than 3 misses.</div>
+      </div>
+    </section>
+
+    <input type="hidden" id="player-name" value="" />
+
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="mode-type" onclick="setGameMode('type')">✏️ Type</button>
+      <button class="mode-btn" id="mode-speak" onclick="setGameMode('speak')">🎤 Speak</button>
+    </div>
+    <div id="speak-submodes" class="speak-submodes hidden">
+      <button class="submode-btn active" id="submode-say" onclick="setSpeakSubmode('say')">🗣️ Say the Word</button>
+      <button class="submode-btn" id="submode-spell" onclick="setSpeakSubmode('spell')">🔤 Spell It Out</button>
+    </div>
+
+    <div class="week-selector">
+      <label for="week-select" class="week-label">📅 Week</label>
+      <select id="week-select" class="week-select">
+        <option value="0">All Words</option>
+      </select>
+    </div>
+
+    <div class="difficulty-buttons">
+      <button class="menu-btn easy-btn" onclick="startGame('easy')">
+        <span class="btn-icon">🌱</span>
+        <span class="btn-label">Easy</span>
+      </button>
+      <button class="menu-btn medium-btn" onclick="startGame('medium')">
+        <span class="btn-icon">⚡</span>
+        <span class="btn-label">Medium</span>
+      </button>
+      <button class="menu-btn hard-btn" onclick="startGame('hard')">
+        <span class="btn-icon">🔥</span>
+        <span class="btn-label">Hard</span>
+      </button>
+    </div>
+
+    <div class="ranked-divider"><span>or compete</span></div>
+
+    <button class="menu-btn ranked-btn" onclick="openRankedMode()">
+      <span class="btn-icon">&#127942;</span>
+      <span class="btn-label">Ranked Mode</span>
+      <span id="ranked-attempts-badge" class="ranked-attempts-badge">3 left</span>
+    </button>
+    <button class="menu-btn" style="margin-top:8px;background:linear-gradient(135deg,#7c2d12,#b45309,#92400e);color:#f5e6c8;border:1.5px solid rgba(212,160,23,0.5);width:100%;font-family:inherit;font-weight:900;letter-spacing:0.5px" onclick="showScreen('od-lobby-screen')">&#9876;&#65039; BATTLE ARENA</button>
+    <div class="menu-links">
+      <button class="menu-link-btn" onclick="showLeaderboard()">🏆 Leaderboard</button>
+      <button class="menu-link-btn" onclick="showWordReview()">📖 Review Words</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PROFILE SCREEN ================= -->
+<div id="profile-screen" class="screen">
+  <div class="profile-card">
+    <button class="back-btn" onclick="showScreen('menu-screen')" title="Back">←</button>
+    <button class="logout-btn" onclick="logoutPlayer()" title="Switch player">🚪 Log Out</button>
+    <div class="profile-header">
+      <div class="profile-avatar" id="profile-avatar" onclick="openAvatarPicker()" title="Change avatar">👤<div class="profile-avatar-edit-hint">✏️</div></div>
+      <div class="profile-name-block">
+        <h2 class="profile-name" id="profile-name-display">Player</h2>
+        <div class="profile-team-badge" id="profile-team-badge" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="profile-stats-grid">
+      <div class="profile-stat">
+        <span class="profile-stat-value" id="pstat-games">0</span>
+        <span class="profile-stat-label">Games</span>
+      </div>
+      <div class="profile-stat">
+        <span class="profile-stat-value" id="pstat-best">0</span>
+        <span class="profile-stat-label">Best Score</span>
+      </div>
+      <div class="profile-stat">
+        <span class="profile-stat-value" id="pstat-streak">0</span>
+        <span class="profile-stat-label">Best Streak</span>
+      </div>
+      <div class="profile-stat">
+        <span class="profile-stat-value" id="pstat-accuracy">0%</span>
+        <span class="profile-stat-label">Best Accuracy</span>
+      </div>
+    </div>
+
+    <div class="profile-ranked-row">
+      <div class="profile-ranked-label">🎖️ Ranked Attempts This Week</div>
+      <div class="profile-attempts-pips" id="profile-attempts-pips"></div>
+    </div>
+
+    <div class="profile-badges-section">
+      <h3 class="profile-section-title">Badges</h3>
+      <div class="profile-badges-grid" id="profile-badges-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= AVATAR PICKER MODAL ================= -->
+<div id="avatar-picker-overlay" class="avatar-picker-overlay hidden">
+  <div class="avatar-picker-box">
+    <div class="avatar-picker-title">&#127912; Choose Your Avatar</div>
+    <div class="avatar-grid" id="avatar-grid"></div>
+    <button class="avatar-picker-close" onclick="closeAvatarPicker()">Done</button>
+  </div>
+</div>
+
+<!-- ================= PIN MODAL ================= -->
+<div id="pin-modal-overlay" class="pin-modal-overlay hidden">
+  <div class="pin-modal-box">
+    <div class="pin-modal-icon">&#128274;</div>
+    <div class="pin-modal-title" id="pin-modal-title">Set Your PIN</div>
+    <div class="pin-modal-sub" id="pin-modal-sub">Create a 4-digit PIN to protect your profile. You'll need it to play ranked games.</div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key" onclick="pinKey('0')" style="grid-column:2">0</button>
+      <button class="pin-key pin-key-del" onclick="pinDel()">&#9003;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= RANKED MODE MODAL ================= -->
+<div id="ranked-modal" class="modal-overlay hidden">
+  <div class="modal-card ranked-modal-card">
+    <div class="ranked-modal-icon">🎖️</div>
+    <h3 class="modal-title">Ranked Mode</h3>
+    <p class="modal-text">Spell as many words as possible. Your <strong>best score</strong> this week counts for your team.</p>
+
+    <div class="ranked-attempts-display">
+      <div id="ranked-pips-modal" class="ranked-pips"></div>
+      <div id="ranked-attempts-text" class="ranked-attempts-text">3 attempts remaining</div>
+      <div id="ranked-reset-text" class="ranked-reset-text">Resets Monday</div>
+    </div>
+
+    <div id="ranked-team-row" class="ranked-team-row hidden">
+      <span id="ranked-team-chip" class="ranked-team-chip"></span>
+    </div>
+
+    <div id="ranked-rank-preview" class="ranked-rank-preview hidden">
+      <div class="rank-preview-label">Your current rank this week</div>
+      <div id="rank-preview-value" class="rank-preview-value">—</div>
+    </div>
+
+    <ul class="ranked-rules-list">
+      <li><span class="rule-icon">💣</span> <strong>Bomb word</strong><span>×2 points</span></li>
+      <li><span class="rule-icon">🔥</span> <strong>×1.7 max streak</strong><span>Diminishing returns</span></li>
+      <li><span class="rule-icon">⏱️</span> <strong>Shrinking timer</strong><span>Less time each word</span></li>
+      <li><span class="rule-icon">✅</span> <strong>Balanced scoring</strong><span>Speed + Accuracy</span></li>
+    </ul>
+
+    <div class="modal-buttons" style="flex-direction:column;gap:8px;margin-top:8px">
+      <button class="menu-btn ranked-btn" onclick="startRanked('dynamic')">
+        <span class="btn-icon">&#127942;</span>
+        <span class="btn-label">Start Ranked Game</span>
+      </button>
+      <button class="menu-btn tertiary-btn" onclick="showRulesModal()">
+        <span class="btn-icon">📋</span>
+        <span class="btn-label">View Full Rules</span>
+      </button>
+      <button class="menu-btn secondary-btn" onclick="closeRankedModal()"><span class="btn-label">Cancel</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= RULES MODAL ================= -->
+<div id="rules-modal" class="modal-overlay hidden">
+  <div class="modal-card rules-modal-card">
+    <div class="rules-modal-header">
+      <div class="rules-modal-icon">📋</div>
+      <h3 class="modal-title">Official Ranked Rules</h3>
+      <button class="modal-close-btn" onclick="closeRulesModal()">×</button>
+    </div>
+    
+    <div class="rules-content">
+      <div class="rules-section">
+        <h4>🏆 Competition Overview</h4>
+        <ul>
+          <li><strong>Weekly Competition</strong>: New rankings every Monday</li>
+          <li><strong>Attempts Per Week</strong>: 3 attempts per player</li>
+          <li><strong>Best Score Only</strong>: Only your highest score counts</li>
+          <li><strong>Team Competition</strong>: Your score adds to team total</li>
+        </ul>
+      </div>
+
+      <div class="rules-section">
+        <h4>⏱️ Timing System</h4>
+        <ul>
+          <li><strong>Starting Time</strong>: 14 seconds per word</li>
+          <li><strong>Time Reduction</strong>: -1 second every 2 correct words</li>
+          <li><strong>Minimum Time</strong>: 4-6 seconds (progressive)</li>
+          <li><strong>Anti-Snowball</strong>: Faster shrink for high performers</li>
+        </ul>
+      </div>
+
+      <div class="rules-section">
+        <h4>🎯 Scoring Breakdown</h4>
+        <ul>
+          <li><strong>Base Points</strong>: 10 points per letter</li>
+          <li><strong>Speed Bonus</strong>: Up to 30% of base points</li>
+          <li><strong>Accuracy Bonus</strong>: Up to 20% of base points</li>
+          <li><strong>Combo Bonus</strong>: 10% for speed + accuracy</li>
+          <li><strong>Perfect Word</strong>: ×1.2 multiplier (no errors + fast)</li>
+        </ul>
+      </div>
+
+      <div class="rules-section">
+        <h4>💣 Special Words</h4>
+        <ul>
+          <li><strong>Bomb Intervals</strong>: Words 5, 10, 15, 20, 25, 30, 35, 40</li>
+          <li><strong>Bomb Bonus</strong>: ×2 multiplier on bomb word</li>
+          <li><strong>Bomb Penalty</strong>: -10% total score if failed (min 10)</li>
+        </ul>
+      </div>
+
+      <div class="rules-section">
+        <h4>🔥 Streak Multipliers</h4>
+        <ul>
+          <li><strong>1-2 words</strong>: ×1.0 (no bonus)</li>
+          <li><strong>3-4 words</strong>: ×1.2</li>
+          <li><strong>5-7 words</strong>: ×1.4</li>
+          <li><strong>8-12 words</strong>: ×1.6</li>
+          <li><strong>13+ words</strong>: ×1.7 (maximum)</li>
+        </ul>
+      </div>
+
+      <div class="rules-section">
+        <h4>🛡️ Streak Protection</h4>
+        <ul>
+          <li><strong>Streak Bank</strong>: Save points at milestones (3, 5, 8, 12)</li>
+          <li><strong>Streak Shield</strong>: Protect streak once at 5+ streak</li>
+          <li><strong>Recovery</strong>: Get up to 100 points back when streak breaks</li>
+        </ul>
+      </div>
+
+      <div class="rules-section">
+        <h4>⚠️ Anti-Cheating</h4>
+        <ul>
+          <li><strong>Tab Switching</strong>: 3 switches = game invalidated</li>
+          <li><strong>Attempt Guard</strong>: Attempt consumed after 3 correct words</li>
+          <li><strong>Score Verification</strong>: All scores tracked for consistency</li>
+        </ul>
+      </div>
+
+      <div class="rules-section">
+        <h4>🎮 Strategy Tips</h4>
+        <ul>
+          <li><strong>Balance Speed & Accuracy</strong>: Both bonuses stack</li>
+          <li><strong>Maintain Streaks</strong>: Use shield strategically</li>
+          <li><strong>Master Bomb Words</strong>: ×2 bonus is significant</li>
+          <li><strong>Perfect Words</strong>: Aim for no errors + fast completion</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modal-buttons">
+      <button class="menu-btn primary-btn" onclick="closeRulesModal()">
+        <span class="btn-label">Got it!</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- team-select-screen removed: admin assigns teams -->
+
+<!-- ================= TEAM MEMBERS SCREEN ================= -->
+<div id="team-members-screen" class="screen">
+  <div class="team-members-card">
+    <button class="back-btn" onclick="showScreen('menu-screen')" title="Back">&#8592;</button>
+    <div class="team-members-header">
+      <div id="team-members-badge" class="team-members-badge"></div>
+      <h2 class="team-members-title">Team Scores</h2>
+      <p class="team-members-sub" id="team-members-week"></p>
+    </div>
+    <div id="team-members-list" class="team-members-list">
+      <p style="text-align:center;opacity:0.5;padding:20px">Loading...</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= GAME SCREEN ================= -->
+<div id="game-screen" class="screen">
+
+  <!-- TOP HUD -->
+  <div class="hud border-b-2 border-white/20 bg-slate-950/20 backdrop-blur-sm">
+    <div class="timer-wrapper rounded-full border-2 border-white/60 bg-white/20 shadow-lg">
+      <svg class="timer-svg" viewBox="0 0 120 120">
+        <circle class="timer-bg" cx="60" cy="60" r="50"/>
+        <circle id="timer-circle" class="timer-progress" cx="60" cy="60" r="50"/>
+      </svg>
+      <div id="timer-text" class="timer-text">60</div>
+    </div>
+
+    <div class="hud-center">
+      <div id="difficulty-badge" class="difficulty-badge">EASY</div>
+      <div id="comp-team-badge" class="comp-team-badge hidden"></div>
+      <div id="streak-display" class="streak-display hidden" title="Words correct in a row!">
+        <div class="streak-fire-bar" id="streak-fire-bar">
+          <div class="streak-fire-fill" id="streak-fire-fill"></div>
+        </div>
+        <span id="streak-count" class="streak-count">0</span>
+        <span id="streak-multiplier" class="streak-multiplier"></span>
+        <span class="streak-label">streak 🔥</span>
+      </div>
+      <div id="player-tag" class="player-tag"></div>
+    </div>
+
+    <div class="score-wrapper rounded-game border-2 border-emerald-200/70 bg-emerald-50/90 px-3 py-1 shadow-lg">
+      <div id="score" class="score">0</div>
+      <div class="score-label">Score</div>
+    </div>
+  </div>
+
+  <!-- ROUND INDICATOR -->
+  <div id="round-indicator" class="round-indicator">Round 1/3  •  Word 1/3</div>
+
+  <!-- LIVES -->
+  <div id="lives-display" class="lives-display">❤️❤️❤️</div>
+
+  <!-- TAB SWITCH WARNING OVERLAY -->
+  <div id="tab-switch-overlay" class="tab-switch-overlay hidden">
+    <div class="tab-switch-box">
+      <div class="tab-switch-icon">⚠️</div>
+      <div class="tab-switch-title">Tab Switch Detected</div>
+      <div id="tab-switch-msg" class="tab-switch-msg">Warning 1/2 — stay on this tab!</div>
+      <button class="menu-btn secondary-btn" onclick="dismissTabWarning()"><span class="btn-label">I understand</span></button>
+    </div>
+  </div>
+
+  <!-- BOMB WORD INDICATOR -->
+  <div id="bomb-indicator" class="bomb-indicator hidden">
+    <span class="bomb-icon">💣</span>
+    <span class="bomb-label">BOMB WORD — ×2 POINTS!</span>
+  </div>
+
+  <!-- MIDDLE CONTENT: image + word area (this section shrinks to fit) -->
+  <div class="game-middle">
+    <!-- REFERENCE IMAGE -->
+    <div class="ref-image-wrapper">
+      <div id="ref-image" class="ref-image"></div>
+      <img id="ref-image-photo" class="ref-image-photo hidden" alt="" />
+    </div>
+
+    <!-- GAME AREA -->
+    <div class="game-area-row">
+      <div class="game-area">
+        <div class="word-section">
+        <div class="sound-buttons">
+          <button onclick="playAudio()" class="sound-btn" title="Listen again (click twice for slow)" aria-label="Listen to the word">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            </svg>
+          </button>
+          <button onclick="playSpell()" class="sound-btn" title="Spell the word (click twice for slow)" aria-label="Spell the word">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19h16"/>
+              <path d="M8 17l4-10 4 10"/>
+              <path d="M9 14h6"/>
+            </svg>
+          </button>
+          <button onclick="playSentence()" class="sound-btn sound-btn-sentence" title="Use in a sentence" aria-label="Use in a sentence">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
+        </div>
+        <div id="word-display" class="word"></div>
+        <!-- KEYBOARD TOGGLE (below letter boxes, only on mobile) -->
+        <div class="keyboard-toggle-container">
+          <button id="kb-toggle" class="keyboard-toggle-btn" onclick="toggleKeyboardMode()" title="Switch between on-screen and device keyboard" aria-label="Toggle keyboard mode">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+              <line x1="2" y1="17" x2="22" y2="17"/>
+            </svg>
+            <span id="kb-toggle-label">Device Keyboard</span>
+          </button>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEYBOARD -->
+  <div id="letter-bank" class="letter-bank"></div>
+
+  <!-- NATIVE KEYBOARD INPUT (hidden, for device keyboard) -->
+  <input id="native-input" type="text" class="native-input hidden" autocomplete="off" aria-label="Type the word using your device keyboard" />
+
+  <!-- MIC AREA (Speaking Mode) -->
+  <div id="mic-area" class="mic-area hidden">
+    <div id="mic-instruction" class="mic-instruction">Tap the mic and say the word</div>
+    <button id="mic-btn" class="mic-btn" onclick="toggleMic()" aria-label="Toggle microphone">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+    </button>
+    <div id="mic-status" class="mic-status"></div>
+    <div id="mic-transcript" class="mic-transcript hidden"></div>
+    <div id="mic-feedback" class="mic-feedback hidden"></div>
+  </div>
+
+  <!-- QUIT BUTTON -->
+  <button class="quit-btn" onclick="confirmQuit()" title="Back to menu" aria-label="Quit game">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+
+  <!-- ROUND TRANSITION OVERLAY -->
+  <div id="round-transition" class="round-transition hidden">
+    <div class="round-transition-card">
+      <div class="rt-emoji" id="rt-emoji">🎉</div>
+      <h2 class="rt-title" id="rt-title">Round 1 Complete!</h2>
+      <div class="rt-stats">
+        <div class="rt-stat">
+          <span class="rt-stat-value" id="rt-round-score">0</span>
+          <span class="rt-stat-label">Round Score</span>
+        </div>
+        <div class="rt-stat">
+          <span class="rt-stat-value" id="rt-total-score">0</span>
+          <span class="rt-stat-label">Total Score</span>
+        </div>
+        <div class="rt-stat">
+          <span class="rt-stat-value" id="rt-streak">0</span>
+          <span class="rt-stat-label">Best Streak</span>
+        </div>
+      </div>
+      <div class="rt-next" id="rt-next">⚡ Round 2 starting...</div>
+      <div class="rt-progress-bar"><div class="rt-progress-fill" id="rt-progress-fill"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- POPUPS (body-level for true position:fixed centering) -->
+<div id="score-popup" class="score-popup hidden"></div>
+<div id="bonus-popup" class="bonus-popup hidden"></div>
+<div id="penalty-popup" class="penalty-popup hidden"></div>
+
+<!-- ================= QUIT CONFIRMATION ================= -->
+<div id="quit-modal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <div class="modal-icon">⚠️</div>
+    <h3 class="modal-title">Leave Game?</h3>
+    <p class="modal-text">Your progress will be lost.</p>
+    <div class="modal-buttons">
+      <button class="menu-btn secondary-btn" onclick="closeQuitModal()">
+        <span class="btn-label">Keep Playing</span>
+      </button>
+      <button class="menu-btn danger-btn" onclick="quitGame()">
+        <span class="btn-label">Leave</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= LEADERBOARD MODAL ================= -->
+<div id="leaderboard-modal" class="modal-overlay hidden">
+  <div class="modal-card modal-card-large">
+    <h3 class="modal-title">🏆 Leaderboard</h3>
+    <div class="lb-tabs">
+      <button class="lb-tab active" onclick="switchLbTab('easy')">Easy</button>
+      <button class="lb-tab" onclick="switchLbTab('medium')">Medium</button>
+      <button class="lb-tab" onclick="switchLbTab('hard')">Hard</button>
+      <button class="lb-tab lb-tab-teams" onclick="switchLbTab('teams')">🏆 Teams</button>
+    </div>
+    <div id="lb-list" class="lb-list">
+      <p class="lb-empty">No scores yet. Be the first!</p>
+    </div>
+    <div class="modal-buttons" style="margin-top:16px">
+      <button class="menu-btn secondary-btn" onclick="closeLeaderboard()">
+        <span class="btn-label">Close</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= WORD REVIEW MODAL ================= -->
+<div id="review-modal" class="modal-overlay hidden">
+  <div class="modal-card modal-card-large">
+    <h3 class="modal-title">📖 Word Review</h3>
+    <div class="lb-tabs">
+      <button class="lb-tab active" onclick="switchReviewTab('easy')">Easy</button>
+      <button class="lb-tab" onclick="switchReviewTab('medium')">Medium</button>
+      <button class="lb-tab" onclick="switchReviewTab('hard')">Hard</button>
+    </div>
+    <div class="review-sort-controls">
+      <label class="sort-label">Sort by:</label>
+      <div class="sort-buttons">
+        <button class="sort-btn active" onclick="sortReviewWords('alphabetical')" id="sort-alphabetical">Alphabetical</button>
+        <button class="sort-btn" onclick="sortReviewWords('week')" id="sort-week">Week Order</button>
+      </div>
+    </div>
+    <div id="review-word-list" class="review-word-list"></div>
+    <div class="modal-buttons" style="margin-top:16px">
+      <button class="menu-btn secondary-btn" onclick="closeWordReview()">
+        <span class="btn-label">Close</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= GAME OVER SCREEN ================= -->
+<div id="game-over-screen" class="screen">
+  <div class="game-over-card">
+    <div class="trophy">🏆</div>
+    <h2 class="game-over-title">Game Complete!</h2>
+
+    <div id="new-best" class="new-best hidden">New Best!</div>
+    <div id="ranked-result-badge" class="ranked-result-badge hidden">🎖️ Ranked Game</div>
+    <div id="new-badges-earned" class="new-badges-earned hidden"></div>
+
+    <div class="final-score-display">
+      <span class="final-score-number" id="final-score-number">0</span>
+      <span class="final-score-label">points</span>
+    </div>
+
+    <div class="final-stats-row">
+      <div class="final-stat">
+        <span id="final-words-completed" class="final-stat-value">0/9</span>
+        <span class="final-stat-label">Words</span>
+      </div>
+      <div class="final-stat">
+        <span id="final-streak" class="final-stat-value">0</span>
+        <span class="final-stat-label">Best Streak</span>
+      </div>
+    </div>
+
+    <div id="score-breakdown" class="score-breakdown"></div>
+
+    <div id="final-rank" class="final-rank hidden"></div>
+
+    <div id="game-over-leaderboard" class="game-over-leaderboard"></div>
+
+    <div id="review-section" class="review-section hidden">
+      <h3>Words to practice:</h3>
+      <div id="review-words" class="review-words"></div>
+    </div>
+
+    <div class="game-over-buttons">
+      <button onclick="returnToMenu()" class="menu-btn secondary-btn">
+        <span class="btn-label">Menu</span>
+      </button>
+      <button id="play-again-btn" onclick="playAgain()" class="menu-btn primary-btn">
+        <span class="btn-label">Play Again</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/script.js?v={{ range(1,99999)|random }}"></script>
+
+<!-- ================= ONLINE DUEL SCREENS ================= -->
+
+<!-- LOBBY -->
+<div id="od-lobby-screen" class="screen" style="display:none">
+  <div class="screen-inner">
+    <div class="screen-title">&#9876;&#65039; BATTLE ARENA</div>
+    <p class="screen-subtitle">Enter the Colosseum. Spell fast, spell first. Only one champion leaves.</p>
+    <div class="od-lobby-tabs">
+      <button class="od-tab-btn active" onclick="odSwitchTab('create', this)">&#9889; Create Room</button>
+      <button class="od-tab-btn"        onclick="odSwitchTab('join', this)">&#128273; Join Room</button>
+    </div>
+    <div id="od-tab-create" class="od-tab-panel active">
+      <div class="od-lobby-field">
+        <label class="od-lobby-label">Warrior name</label>
+        <input id="od-create-name" class="name-input" type="text" placeholder="Enter your name" maxlength="18" autocomplete="off"/>
+      </div>
+      <div class="od-lobby-field">
+        <label class="od-lobby-label">Rounds to win</label>
+        <div class="od-rounds-row">
+          <button class="od-rounds-pill" onclick="odPickRounds(2,this)">2</button>
+          <button class="od-rounds-pill active" onclick="odPickRounds(3,this)">3</button>
+          <button class="od-rounds-pill" onclick="odPickRounds(5,this)">5</button>
+        </div>
+        <input type="hidden" id="od-create-rounds" value="3"/>
+      </div>
+      <div id="od-create-error" class="od-error"></div>
+      <button class="start-btn" onclick="odCreateRoom()">&#128481;&#65039; Enter the Arena</button>
+    </div>
+    <div id="od-tab-join" class="od-tab-panel">
+      <div class="od-lobby-field">
+        <label class="od-lobby-label">Warrior name</label>
+        <input id="od-join-name" class="name-input" type="text" placeholder="Enter your name" maxlength="18" autocomplete="off"/>
+      </div>
+      <div class="od-lobby-field">
+        <label class="od-lobby-label">Arena code</label>
+        <input id="od-join-code" class="od-code-input" type="text" placeholder="ABCD" maxlength="4" autocomplete="off" oninput="this.value=this.value.toUpperCase()"/>
+      </div>
+      <div id="od-join-error" class="od-error"></div>
+      <button class="start-btn" onclick="odJoinRoom()">&#9876;&#65039; Join the Battle</button>
+    </div>
+    <button class="back-btn" style="margin-top:10px" onclick="returnToMenu()">&#8592; Retreat</button>
+  </div>
+</div>
+
+<!-- WAITING -->
+<div id="od-waiting-screen" class="screen" style="display:none">
+  <div class="screen-inner" style="text-align:center">
+    <div class="screen-title">Waiting&hellip;</div>
+    <div style="margin:14px 0 6px">
+      <label style="font-size:11px;color:rgba(255,255,255,0.45);font-weight:700;letter-spacing:0.6px;text-transform:uppercase;display:block;margin-bottom:6px;">Room code &mdash; share with opponent</label>
+      <span class="od-big-code" id="od-waiting-code">????</span>
+      <div class="od-code-hint">4-letter code</div>
+      <button class="od-copy-btn" onclick="odCopyCode()">&#128203; Copy code</button>
+    </div>
+    <p id="od-waiting-msg" style="color:rgba(255,255,255,0.55);font-size:14px;">Waiting for opponent to join&hellip;</p>
+    <button class="back-btn" style="margin-top:18px" onclick="odLeaveWaiting()">&#8592; Cancel</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="od-game-screen" class="screen" style="display:none">
+  <div id="od-countdown-overlay" class="hidden">
+    <div id="od-countdown-num">3</div>
+  </div>
+  <div id="od-toast" class="od-toast hidden"></div>
+  <div class="od-header">
+    <div class="od-header-player od-header-me">
+      <div class="od-hdr-name" id="od-my-name-hdr">You</div>
+      <div class="od-hdr-score-label">SCORE</div>
+      <div class="od-hdr-score" id="od-my-score">0</div>
+      <div class="od-pips" id="od-my-wins"></div>
+    </div>
+    <div class="od-header-center">
+      <div class="od-timer" id="od-timer">&mdash;</div>
+      <div class="od-round-label" id="od-round-label">ROUND 1</div>
+    </div>
+    <div class="od-header-player od-header-opp">
+      <div class="od-hdr-name" id="od-opp-name-hdr">Opponent</div>
+      <div class="od-hdr-score-label">SCORE</div>
+      <div class="od-hdr-score" id="od-opp-score">0</div>
+      <div class="od-pips" id="od-opp-wins"></div>
+    </div>
+  </div>
+  <div class="od-game-body">
+    <div class="od-pu-side" id="od-pu-left"></div>
+    <div class="od-play-zone">
+      <img id="od-word-img" src="" alt="" />
+      <div class="od-status-badges">
+        <div id="od-x2-badge"     class="od-badge od-badge-x2 hidden">&#9889; x2</div>
+        <div id="od-shield-badge" class="od-badge od-badge-shield hidden">&#128737; Shield</div>
+      </div>
+      <button class="od-hear-btn" onclick="playTTS('/speak/'+encodeURIComponent(odWord),null,null)">&#128266; Hear again</button>
+      <div class="od-boxes-wrap"><div id="od-word-boxes"></div></div>
+      <div id="od-complete-msg" class="od-complete-msg hidden"></div>
+      <div id="od-opp-complete-msg" class="od-opp-msg hidden"></div>
+      <div class="od-opp-section">
+        <span class="od-opp-label" id="od-opp-prog-name">Opp</span>
+        <div class="od-opp-bar"><div class="od-opp-bar-fill" id="od-opp-bar-fill" style="width:0%"></div></div>
+        <span class="od-opp-bar-pct" id="od-opp-bar-pct">0%</span>
+      </div>
+      <div id="od-frozen-overlay" class="hidden"><div class="od-frozen-msg">&#10052; FROZEN</div></div>
+      <div id="od-round-overlay" class="hidden">
+        <div class="od-round-card">
+          <div class="od-result-emoji" id="od-result-emoji">&#127942;</div>
+          <div class="od-result-title" id="od-result-title"></div>
+          <div class="od-result-word"  id="od-result-word"></div>
+          <div id="od-result-scores"></div>
+          <div class="od-next-label">Next round starting&hellip;</div>
+        </div>
+      </div>
+    </div>
+    <div class="od-pu-side" id="od-pu-right"></div>
+  </div>
+  <div class="od-kb-wrap"><div id="od-soft-kb"></div></div>
+  <button onclick="odConfirmQuit()" style="position:absolute;top:8px;right:10px;background:transparent;border:none;color:rgba(245,230,200,0.25);font-size:20px;cursor:pointer;z-index:20;line-height:1;padding:4px;">&#10005;</button>
+</div>
+
+<!-- MATCH OVER -->
+<div id="od-over-screen" class="screen" style="display:none">
+  <div class="screen-inner" style="text-align:center">
+    <div style="font-size:64px;margin-bottom:10px;line-height:1">&#127942;</div>
+    <div class="screen-title" id="od-over-title">Match over!</div>
+    <div id="od-final-scores" style="margin:18px 0;max-width:340px;margin-inline:auto"></div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+      <button class="start-btn" onclick="odPlayAgain()">&#9876;&#65039; Play again</button>
+      <button class="back-btn"  onclick="returnToMenu()">&#8592; Main menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function odSwitchTab(tab, btn) {
+  document.querySelectorAll(".od-tab-btn").forEach(function(b){ b.classList.remove("active"); });
+  document.querySelectorAll(".od-tab-panel").forEach(function(p){ p.classList.remove("active"); });
+  btn.classList.add("active");
+  document.getElementById("od-tab-" + tab).classList.add("active");
+}
+function odPickRounds(n, btn) {
+  document.querySelectorAll(".od-rounds-pill").forEach(function(b){ b.classList.remove("active"); });
+  btn.classList.add("active");
+  document.getElementById("od-create-rounds").value = n;
+}
+function odLeaveWaiting() {
+  if (typeof odSocket !== 'undefined' && odSocket) odSocket.disconnect();
+  odSocket = null;
+  returnToMenu();
+}
+document.addEventListener("DOMContentLoaded", function() {
+  var src = document.getElementById("week-select");
+  var dst = document.getElementById("od-create-week");
+  if (src && dst) dst.innerHTML = src.innerHTML;
+});
+</script>
+
+<script src="/static/online_duel.js"></script>
+</body>
+</html>

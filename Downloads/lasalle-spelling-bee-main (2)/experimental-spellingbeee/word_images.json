@@ -1,0 +1,740 @@
+{
+  "accident": {
+    "local": "accident.jpg"
+  },
+  "accomplishments": {
+    "local": "accomplishments.jpg"
+  },
+  "achievements": {
+    "local": "achievements.jpg"
+  },
+  "achieving": {
+    "local": "achieving.jpg"
+  },
+  "acknowledgement": {
+    "local": "acknowledgement.jpg"
+  },
+  "acquiring": {
+    "emoji": "🎯"
+  },
+  "address": {
+    "local": "address.jpg"
+  },
+  "administration": {
+    "local": "administration.jpg"
+  },
+  "admiration mark": {
+    "local": "admiration_mark.jpg"
+  },
+  "adventure": {
+    "local": "adventure.jpg"
+  },
+  "advertisement": {
+    "local": "advertisement.jpg"
+  },
+  "advertising": {
+    "local": "advertising.jpg"
+  },
+  "aeroplane": {
+    "local": "aeroplane.jpg"
+  },
+  "afterwards": {
+    "local": "afterwards.jpg"
+  },
+  "agreement": {
+    "local": "agreement.jpg"
+  },
+  "airport": {
+    "local": "airport.jpg"
+  },
+  "alcoholism": {
+    "local": "alcoholism.jpg"
+  },
+  "already": {
+    "local": "already.jpg"
+  },
+  "ambitious": {
+    "local": "ambitious.jpg"
+  },
+  "ambulance": {
+    "local": "ambulance.jpg"
+  },
+  "animation": {
+    "local": "animation.jpg"
+  },
+  "apparently": {
+    "local": "apparently.jpg"
+  },
+  "application": {
+    "local": "application.jpg"
+  },
+  "applying": {
+    "local": "applying.jpg"
+  },
+  "appointment": {
+    "local": "appointment.jpg"
+  },
+  "appreciate": {
+    "local": "appreciate.jpg"
+  },
+  "appreciation": {
+    "local": "appreciation.jpg"
+  },
+  "apprehensive": {
+    "local": "apprehensive.jpg"
+  },
+  "appropriate": {
+    "local": "appropriate.jpg"
+  },
+  "architecture": {
+    "local": "architecture.jpg"
+  },
+  "arrangements": {
+    "local": "arrangements.jpg"
+  },
+  "association": {
+    "local": "association.jpg"
+  },
+  "astronomical": {
+    "local": "astronomical.jpg"
+  },
+  "attention": {
+    "local": "attention.jpg"
+  },
+  "authority": {
+    "local": "authority.jpg"
+  },
+  "autumn": {
+    "local": "autumn.jpg"
+  },
+  "availability": {
+    "local": "availability.jpg"
+  },
+  "bakery": {
+    "local": "bakery.jpg"
+  },
+  "beautiful": {
+    "local": "beautiful.jpg"
+  },
+  "beautifully": {
+    "local": "beautifully.jpg"
+  },
+  "beginning": {
+    "local": "beginning.jpg"
+  },
+  "believe": {
+    "local": "believe.jpg"
+  },
+  "belongings": {
+    "local": "belongings.jpg"
+  },
+  "biscuit": {
+    "local": "biscuit.jpg"
+  },
+  "bottle opener": {
+    "local": "bottle_opener.jpg"
+  },
+  "bungee jumping": {
+    "local": "bungee_jumping.jpg"
+  },
+  "business": {
+    "local": "business.jpg"
+  },
+  "businessman": {
+    "local": "businessman.jpg"
+  },
+  "camping": {
+    "local": "camping.jpg"
+  },
+  "castle": {
+    "local": "castle.jpg"
+  },
+  "catastrophic": {
+    "local": "catastrophic.jpg"
+  },
+  "centre": {
+    "local": "centre.jpg"
+  },
+  "certainly": {
+    "local": "certainly.jpg"
+  },
+  "challenge": {
+    "local": "challenge.jpg"
+  },
+  "championship": {
+    "local": "championship.jpg"
+  },
+  "character": {
+    "local": "character.jpg"
+  },
+  "cheesecake": {
+    "local": "cheesecake.jpg"
+  },
+  "chinatown": {
+    "local": "chinatown.jpg"
+  },
+  "chocolate": {
+    "local": "chocolate.jpg"
+  },
+  "chopping board": {
+    "local": "chopping_board.jpg"
+  },
+  "circumstances": {
+    "local": "circumstances.jpg"
+  },
+  "civilization": {
+    "local": "civilization.jpg"
+  },
+  "colleagues": {
+    "local": "colleagues.jpg"
+  },
+  "combination": {
+    "local": "combination.jpg"
+  },
+  "comfortable": {
+    "local": "comfortable.jpg"
+  },
+  "commitment": {
+    "local": "commitment.jpg"
+  },
+  "communication": {
+    "local": "communication.jpg"
+  },
+  "comparative": {
+    "local": "comparative.jpg"
+  },
+  "competition": {
+    "local": "competition.jpg"
+  },
+  "completely": {
+    "local": "completely.jpg"
+  },
+  "comprehension": {
+    "local": "comprehension.jpg"
+  },
+  "comprehensive": {
+    "local": "comprehensive.jpg"
+  },
+  "computer room": {
+    "local": "computer_room.jpg"
+  },
+  "conditions": {
+    "local": "conditions.jpg"
+  },
+  "confusing": {
+    "local": "confusing.jpg"
+  },
+  "consciously": {
+    "local": "consciously.jpg"
+  },
+  "consecutively": {
+    "local": "consecutively.jpg"
+  },
+  "consideration": {
+    "local": "consideration.jpg"
+  },
+  "consolidation": {
+    "local": "consolidation.jpg"
+  },
+  "contained": {
+    "local": "contained.jpg"
+  },
+  "containing": {
+    "local": "containing.jpg"
+  },
+  "continuously": {
+    "local": "continuously.jpg"
+  },
+  "corkscrew": {
+    "local": "corkscrew.jpg"
+  },
+  "correctly": {
+    "local": "correctly.jpg"
+  },
+  "countryside": {
+    "local": "countryside.jpg"
+  },
+  "courageously": {
+    "local": "courageously.jpg"
+  },
+  "dangerous": {
+    "local": "dangerous.jpg"
+  },
+  "decisions": {
+    "local": "decisions.jpg"
+  },
+  "definition": {
+    "local": "definition.jpg"
+  },
+  "delicious": {
+    "local": "delicious.jpg"
+  },
+  "dermatologist": {
+    "local": "dermatologist.jpg"
+  },
+  "descriptions": {
+    "local": "descriptions.jpg"
+  },
+  "desserts": {
+    "local": "desserts.jpg"
+  },
+  "difference": {
+    "local": "difference.jpg"
+  },
+  "disappointing": {
+    "local": "disappointing.jpg"
+  },
+  "distraction": {
+    "local": "distraction.jpg"
+  },
+  "distribution": {
+    "local": "distribution.jpg"
+  },
+  "doctor": {
+    "local": "doctor.jpg"
+  },
+  "documentary": {
+    "local": "documentary.jpg"
+  },
+  "earthquake": {
+    "local": "earthquake.jpg"
+  },
+  "economically": {
+    "local": "economically.jpg"
+  },
+  "education": {
+    "local": "education.jpg"
+  },
+  "effectiveness": {
+    "local": "effectiveness.jpg"
+  },
+  "email": {
+    "local": "email.jpg"
+  },
+  "employment": {
+    "local": "employment.jpg"
+  },
+  "encyclopedia": {
+    "local": "encyclopedia.jpg"
+  },
+  "engineering": {
+    "local": "engineering.jpg"
+  },
+  "entertainment": {
+    "local": "entertainment.jpg"
+  },
+  "enthusiastic": {
+    "local": "enthusiastic.jpg"
+  },
+  "equality": {
+    "local": "equality.jpg"
+  },
+  "equipment": {
+    "local": "equipment.jpg"
+  },
+  "eternity": {
+    "local": "eternity.jpg"
+  },
+  "examination": {
+    "local": "examination.jpg"
+  },
+  "excellent": {
+    "local": "excellent.jpg"
+  },
+  "excitement": {
+    "local": "excitement.jpg"
+  },
+  "exhibition": {
+    "local": "exhibition.jpg"
+  },
+  "expensive": {
+    "local": "expensive.jpg"
+  },
+  "experience": {
+    "local": "experience.jpg"
+  },
+  "exploration": {
+    "local": "exploration.jpg"
+  },
+  "expression": {
+    "local": "expression.jpg"
+  },
+  "extraordinary": {
+    "local": "extraordinary.jpg"
+  },
+  "extremely": {
+    "local": "extremely.jpg"
+  },
+  "facilities": {
+    "local": "facilities.jpg"
+  },
+  "family": {
+    "local": "family.jpg"
+  },
+  "features": {
+    "local": "features.jpg"
+  },
+  "following": {
+    "local": "following.jpg"
+  },
+  "food court": {
+    "local": "food_court.jpg"
+  },
+  "foreign": {
+    "local": "foreign.jpg"
+  },
+  "freezing": {
+    "local": "freezing.jpg"
+  },
+  "furniture": {
+    "local": "furniture.jpg"
+  },
+  "further": {
+    "local": "further.jpg"
+  },
+  "geography": {
+    "local": "geography.jpg"
+  },
+  "girlfriend": {
+    "local": "girlfriend.jpg"
+  },
+  "grateful": {
+    "local": "grateful.jpg"
+  },
+  "hardworking": {
+    "local": "hardworking.jpg"
+  },
+  "harmonious": {
+    "local": "harmonious.jpg"
+  },
+  "headache": {
+    "local": "headache.jpg"
+  },
+  "headphones": {
+    "local": "headphones.jpg"
+  },
+  "hopefully": {
+    "local": "hopefully.jpg"
+  },
+  "household chores": {
+    "local": "household_chores.jpg"
+  },
+  "housewares": {
+    "local": "housewares.jpg"
+  },
+  "hypertension": {
+    "local": "hypertension.jpg"
+  },
+  "hyperthyroidism": {
+    "emoji": "🏥"
+  },
+  "hypervitaminosis": {
+    "emoji": "💊"
+  },
+  "ice hockey": {
+    "local": "ice_hockey.jpg"
+  },
+  "imagination": {
+    "local": "imagination.jpg"
+  },
+  "immigration": {
+    "local": "immigration.jpg"
+  },
+  "importance": {
+    "local": "importance.jpg"
+  },
+  "independently": {
+    "local": "independently.jpg"
+  },
+  "indirectly": {
+    "local": "indirectly.jpg"
+  },
+  "information": {
+    "local": "information.jpg"
+  },
+  "interesting": {
+    "local": "interesting.jpg"
+  },
+  "international": {
+    "local": "international.jpg"
+  },
+  "internationally": {
+    "local": "internationally.jpg"
+  },
+  "interruption": {
+    "local": "interruption.jpg"
+  },
+  "introducing": {
+    "local": "introducing.jpg"
+  },
+  "investigation": {
+    "local": "investigation.jpg"
+  },
+  "involving": {
+    "local": "involving.jpg"
+  },
+  "jewellery": {
+    "local": "jewellery.jpg"
+  },
+  "kilometre": {
+    "local": "kilometre.jpg"
+  },
+  "kitesurfing": {
+    "local": "kitesurfing.jpg"
+  },
+  "knowledge": {
+    "local": "knowledge.jpg"
+  },
+  "languages": {
+    "local": "languages.jpg"
+  },
+  "library": {
+    "local": "library.jpg"
+  },
+  "lightning": {
+    "local": "lightning.jpg"
+  },
+  "linguistics": {
+    "local": "linguistics.jpg"
+  },
+  "literature": {
+    "local": "literature.jpg"
+  },
+  "luggage": {
+    "local": "luggage.jpg"
+  },
+  "management": {
+    "local": "management.jpg"
+  },
+  "marathon": {
+    "local": "marathon.jpg"
+  },
+  "medication": {
+    "local": "medication.jpg"
+  },
+  "medicine": {
+    "local": "medicine.jpg"
+  },
+  "mediterranean": {
+    "local": "mediterranean.jpg"
+  },
+  "methodology": {
+    "local": "methodology.jpg"
+  },
+  "microwave oven": {
+    "local": "microwave_oven.jpg"
+  },
+  "minute": {
+    "local": "minute.jpg"
+  },
+  "mischievous": {
+    "local": "mischievous.jpg"
+  },
+  "modernization": {
+    "local": "modernization.jpg"
+  },
+  "monitoring": {
+    "local": "monitoring.jpg"
+  },
+  "mountainous": {
+    "local": "mountainous.jpg"
+  },
+  "movie theater": {
+    "local": "movie_theater.jpg"
+  },
+  "necessary": {
+    "local": "necessary.jpg"
+  },
+  "neighborhood": {
+    "local": "neighborhood.jpg"
+  },
+  "nevertheless": {
+    "emoji": "🔄"
+  },
+  "opposite": {
+    "local": "opposite.jpg"
+  },
+  "overwhelming": {
+    "local": "overwhelming.jpg"
+  },
+  "paperless": {
+    "local": "paperless.jpg"
+  },
+  "paragliding": {
+    "local": "paragliding.jpg"
+  },
+  "participles": {
+    "emoji": "📝"
+  },
+  "phenomenon": {
+    "local": "phenomenon.jpg"
+  },
+  "philosophy": {
+    "local": "philosophy.jpg"
+  },
+  "politician": {
+    "local": "politician.jpg"
+  },
+  "possessions": {
+    "local": "possessions.jpg"
+  },
+  "possibilities": {
+    "local": "possibilities.jpg"
+  },
+  "potentially": {
+    "local": "potentially.jpg"
+  },
+  "predictions": {
+    "local": "predictions.jpg"
+  },
+  "prescription": {
+    "local": "prescription.jpg"
+  },
+  "presentations": {
+    "local": "presentations.jpg"
+  },
+  "questioning": {
+    "local": "questioning.jpg"
+  },
+  "queue": {
+    "local": "queue.jpg"
+  },
+  "rainforest": {
+    "local": "rainforest.jpg"
+  },
+  "refrigerator": {
+    "local": "refrigerator.jpg"
+  },
+  "relationship": {
+    "local": "relationship.jpg"
+  },
+  "resolutions": {
+    "local": "resolutions.jpg"
+  },
+  "revolutionary": {
+    "local": "revolutionary.jpg"
+  },
+  "ridiculous": {
+    "local": "ridiculous.jpg"
+  },
+  "romanticism": {
+    "local": "romanticism.jpg"
+  },
+  "salesperson": {
+    "local": "salesperson.jpg"
+  },
+  "satisfaction": {
+    "local": "satisfaction.jpg"
+  },
+  "scientifically": {
+    "local": "scientifically.jpg"
+  },
+  "screwdriver": {
+    "local": "screwdriver.jpg"
+  },
+  "sentences": {
+    "local": "sentences.jpg"
+  },
+  "shopping bag": {
+    "local": "shopping_bag.jpg"
+  },
+  "shopping center": {
+    "local": "shopping_center.jpg"
+  },
+  "sightseeing": {
+    "local": "sightseeing.jpg"
+  },
+  "significance": {
+    "local": "significance.jpg"
+  },
+  "snorkeling": {
+    "local": "snorkeling.jpg"
+  },
+  "statements": {
+    "local": "statements.jpg"
+  },
+  "stomachache": {
+    "local": "stomachache.jpg"
+  },
+  "strawberry": {
+    "local": "strawberry.jpg"
+  },
+  "stressful": {
+    "local": "stressful.jpg"
+  },
+  "successfully": {
+    "emoji": "🎉"
+  },
+  "suggestions": {
+    "local": "suggestions.jpg"
+  },
+  "surprisingly": {
+    "local": "surprisingly.jpg"
+  },
+  "technician": {
+    "local": "technician.jpg"
+  },
+  "technology": {
+    "local": "technology.jpg"
+  },
+  "temperature": {
+    "local": "temperature.jpg"
+  },
+  "terrifying": {
+    "local": "terrifying.jpg"
+  },
+  "thrilling": {
+    "local": "thrilling.jpg"
+  },
+  "throughout": {
+    "local": "throughout.jpg"
+  },
+  "toothache": {
+    "local": "toothache.jpg"
+  },
+  "transnational": {
+    "local": "transnational.jpg"
+  },
+  "understandable": {
+    "local": "understandable.jpg"
+  },
+  "understanding": {
+    "local": "understanding.jpg"
+  },
+  "unforgettable": {
+    "local": "unforgettable.jpg"
+  },
+  "united states": {
+    "local": "united_states.jpg"
+  },
+  "university": {
+    "local": "university.jpg"
+  },
+  "unstoppable": {
+    "local": "unstoppable.jpg"
+  },
+  "vegetables": {
+    "local": "vegetables.jpg"
+  },
+  "vocabulary": {
+    "local": "vocabulary.jpg"
+  },
+  "washing machine": {
+    "local": "washing_machine.jpg"
+  },
+  "wednesday": {
+    "local": "wednesday.jpg"
+  },
+  "weekly planner": {
+    "local": "weekly_planner.jpg"
+  },
+  "windsurfing": {
+    "local": "windsurfing.jpg"
+  },
+  "wooden spoon": {
+    "local": "wooden_spoon.jpg"
+  },
+  "workaholic": {
+    "local": "workaholic.jpg"
+  }
+}

@@ -1,0 +1,66 @@
+================================================================================
+COMMIT CAMBIOS EN RAMA PROJECT-APOLLO
+================================================================================
+
+Ejecuta estos comandos en tu terminal:
+
+================================================================================
+PASO 1: Asegúrate de estar en rama project-apollo
+================================================================================
+git checkout project-apollo
+
+
+PASO 2: Commit los cambios restaurados
+================================================================================
+git add .
+git commit -m "PROJECT APOLLO: Add sound effects and visual enhancements
+
+- Re-added arena_sounds.js (Web Audio API sound system)
+- Re-added arena_ui_sounds.js (UI interaction sounds)
+- Re-added arena_ambience.js (background particle effects)
+- Re-enabled all sound effect calls in online_duel.js
+- Re-enabled particle animations and visual effects
+- This is the experimental version for local testing only"
+
+
+PASO 3: Push cambios a GitHub
+================================================================================
+git push origin project-apollo
+
+
+PASO 4: Verificar que todo está bien
+================================================================================
+git log --oneline -5
+git branch -a
+
+
+================================================================================
+RESULTADO ESPERADO
+================================================================================
+
+Después de ejecutar estos comandos:
+
+1. Verás que estás en rama project-apollo
+2. Los cambios se habrán commiteado
+3. Los cambios se habrán pusheado a GitHub
+4. Verás el log con los últimos commits
+
+================================================================================
+ESTRUCTURA FINAL
+================================================================================
+
+lasalle-spelling-bee (un solo repo)
+├── main (rama estable)
+│   ├── Sin sonidos
+│   ├── Sin efectos visuales
+│   ├── Battle Arena UI funcional
+│   └── Protegida en GitHub
+│
+└── project-apollo (rama experimental)
+    ├── Todos los cambios de main
+    ├── + Sonidos (arena_sounds.js, etc.)
+    ├── + Efectos visuales
+    ├── + Animaciones de partículas
+    └── Solo testing local
+
+================================================================================

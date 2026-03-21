@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@500;600;700&family=Fira+Sans:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --mc-primary: #0f172a;
+    --mc-accent: #7c3aed;
+    --mc-success: #22c55e;
+    --mc-warning: #f59e0b;
+    --mc-danger: #ef4444;
+    --mc-neutral: #f8fafc;
+  }
+}
+
+@layer components {
+  .mc-card {
+    @apply rounded-game-lg border-2 border-white/70 bg-white/90 p-4 shadow-game-soft backdrop-blur-sm transition duration-200;
+  }
+
+  .mc-chip {
+    @apply inline-flex min-h-[44px] items-center rounded-full border px-3 py-1 text-xs font-bold tracking-wide;
+  }
+
+  .mc-stat {
+    @apply rounded-game border-2 border-slate-200 bg-white p-3 shadow-sm transition duration-200 hover:-translate-y-0.5;
+  }
+
+  .mc-cta {
+    @apply inline-flex min-h-[44px] items-center justify-center rounded-xl border-2 border-slate-900 bg-slate-900 px-4 py-2 text-sm font-bold text-white transition duration-200 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-stat,
+  .mc-card,
+  .mc-cta {
+    transition: none !important;
+  }
+}
