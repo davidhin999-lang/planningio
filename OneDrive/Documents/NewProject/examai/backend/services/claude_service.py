@@ -4,8 +4,13 @@ import json
 import re
 import os
 
-# Initialize Gemini API with key from .env
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+# Validate API key is set
+api_key = os.getenv("GEMINI_API_KEY")
+if not api_key:
+    raise ValueError("GEMINI_API_KEY environment variable is not set")
+
+# Initialize Gemini API
+genai.configure(api_key=api_key)
 
 SYSTEM_PROMPT = """Eres un asistente de corrección de exámenes para profesores de educación básica y media.
 Tu trabajo es revisar la imagen de un examen escrito por un alumno y calificarlo con base en la rúbrica proporcionada.
@@ -62,10 +67,14 @@ def grade_exam(image_bytes: bytes, media_type: str, rubric: list, language: str 
             "mime_type": mime_type,
             "data": image_b64,
         },
-        user_prompt,
+        {"text": user_prompt}
     ]
 
-    response = model.generate_content(content)
+    try:
+        response = model.generate_content(content)
+    except Exception as exc:
+        raise ValueError(f"Gemini API error: {exc}") from exc
+
     raw_text = response.text
 
     return _parse_json_response(raw_text)
@@ -82,7 +91,7 @@ def _get_gemini_mime_type(anthropic_media_type: str) -> str:
 
 
 def _parse_json_response(text: str) -> dict:
-    """Safely parse JSON from Claude's response, handling common formatting issues."""
+    """Safely parse JSON from Gemini's response, handling common formatting issues."""
     text = text.strip()
 
     # Strip markdown code fences if present
@@ -101,5 +110,5 @@ def _parse_json_response(text: str) -> dict:
             except json.JSONDecodeError:
                 pass
         raise ValueError(
-            f"Could not parse a valid JSON object from Claude's response. Raw output:\n{text[:500]}"
+            f"Could not parse a valid JSON object from Gemini's response. Raw output:\n{text[:500]}"
         )
