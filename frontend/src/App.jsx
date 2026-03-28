@@ -1,121 +1,60 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { useAuth } from './context/AuthContext'
+import Landing from './pages/Landing'
+import Login from './pages/Login'
+import Dashboard from './pages/Dashboard'
+import Generate from './pages/Generate'
+import PlanView from './pages/PlanView'
+import Billing from './pages/Billing'
+import AdminSchool from './pages/AdminSchool'
 
-function App() {
-  const [count, setCount] = useState(0)
-
+function Spinner() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <div className="min-h-screen bg-bg flex items-center justify-center">
+      <div
+        className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"
+        aria-label="Cargando"
+        role="status"
+      />
+    </div>
   )
 }
 
-export default App
+function RequireAuth({ children }) {
+  const { currentUser, loading } = useAuth()
+  if (loading) return <Spinner />
+  return currentUser ? children : <Navigate to="/login" replace />
+}
+
+function RequireSchoolAdmin({ children }) {
+  const { subscription } = useAuth()
+  if (subscription.plan !== 'escuela') return <Navigate to="/dashboard" replace />
+  return children
+}
+
+export default function App() {
+  const { currentUser, loading } = useAuth()
+
+  if (loading) return <Spinner />
+
+  return (
+    <Routes>
+      <Route path="/" element={currentUser ? <Navigate to="/dashboard" replace /> : <Landing />} />
+      <Route path="/login" element={currentUser ? <Navigate to="/dashboard" replace /> : <Login />} />
+      <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+      <Route path="/generate" element={<RequireAuth><Generate /></RequireAuth>} />
+      <Route path="/plan/:id" element={<RequireAuth><PlanView /></RequireAuth>} />
+      <Route path="/billing" element={<RequireAuth><Billing /></RequireAuth>} />
+      <Route
+        path="/admin/school"
+        element={
+          <RequireAuth>
+            <RequireSchoolAdmin>
+              <AdminSchool />
+            </RequireSchoolAdmin>
+          </RequireAuth>
+        }
+      />
+    </Routes>
+  )
+}
