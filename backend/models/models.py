@@ -1,64 +1,107 @@
-from sqlalchemy import Column, String, Integer, Boolean, Text, DateTime, ForeignKey
 from datetime import datetime, timezone
+from typing import Optional
+from sqlalchemy import (
+    Text, Integer, Boolean, DateTime, ForeignKey,
+    String, JSON,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from db import Base
+
+
+def _now():
+    return datetime.now(timezone.utc)
 
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(String, primary_key=True)
-    email = Column(String, nullable=False, unique=True)
-    display_name = Column(String)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    email: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
+    display_name: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_now, nullable=False
+    )
+
+    subscription: Mapped[Optional["Subscription"]] = relationship(
+        "Subscription", back_populates="user", uselist=False
+    )
+    planeaciones: Mapped[list["Planeacion"]] = relationship(
+        "Planeacion", back_populates="user"
+    )
+    usage_logs: Mapped[list["UsageLog"]] = relationship(
+        "UsageLog", back_populates="user"
+    )
 
 
 class School(Base):
     __tablename__ = "schools"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String, nullable=False)
-    admin_id = Column(String, ForeignKey("users.id"))
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    admin_id: Mapped[Optional[str]] = mapped_column(
+        Text, ForeignKey("users.id"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_now, nullable=False
+    )
+
+    members: Mapped[list["Subscription"]] = relationship(
+        "Subscription", back_populates="school"
+    )
 
 
 class Subscription(Base):
     __tablename__ = "subscriptions"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(String, ForeignKey("users.id"))
-    stripe_customer_id = Column(String, unique=True)
-    stripe_sub_id = Column(String, unique=True)
-    plan = Column(String, nullable=False, default="free")
-    status = Column(String, nullable=False, default="active")
-    current_period_end = Column(DateTime(timezone=True))
-    school_id = Column(Integer, ForeignKey("schools.id"), nullable=True)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[str] = mapped_column(Text, ForeignKey("users.id"), nullable=False)
+    stripe_customer_id: Mapped[Optional[str]] = mapped_column(Text, unique=True, nullable=True)
+    stripe_sub_id: Mapped[Optional[str]] = mapped_column(Text, unique=True, nullable=True)
+    plan: Mapped[str] = mapped_column(String(20), nullable=False, default="free")
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="active")
+    current_period_end: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    school_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("schools.id"), nullable=True)
+
+    user: Mapped["User"] = relationship("User", back_populates="subscription")
+    school: Mapped[Optional["School"]] = relationship("School", back_populates="members")
 
 
 class Planeacion(Base):
     __tablename__ = "planeaciones"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(String, ForeignKey("users.id"))
-    title = Column(String)
-    subject = Column(String, nullable=False)
-    grade_level = Column(String, nullable=False)
-    topic = Column(String, nullable=False)
-    objective = Column(String, nullable=False)
-    content = Column(Text, nullable=False)  # JSON string (SQLite compatible)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    is_deleted = Column(Boolean, default=False)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[str] = mapped_column(Text, ForeignKey("users.id"), nullable=False)
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    subject: Mapped[str] = mapped_column(Text, nullable=False)
+    grade_level: Mapped[str] = mapped_column(Text, nullable=False)
+    topic: Mapped[str] = mapped_column(Text, nullable=False)
+    objective: Mapped[str] = mapped_column(Text, nullable=False)
+    content: Mapped[dict] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    user: Mapped["User"] = relationship("User", back_populates="planeaciones")
 
 
 class UsageLog(Base):
     __tablename__ = "usage_log"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(String, ForeignKey("users.id"))
-    action = Column(String, nullable=False)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[str] = mapped_column(Text, ForeignKey("users.id"), nullable=False)
+    action: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, nullable=False)
+
+    user: Mapped["User"] = relationship("User", back_populates="usage_logs")
 
 
 class CurriculumChunk(Base):
+    """pgvector embedding stored as Text in SQLite tests; use VECTOR(768) in prod migrations."""
     __tablename__ = "curriculum_chunks"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    grade_level = Column(String, nullable=False)
-    subject = Column(String, nullable=False)
-    source = Column(String, nullable=False)
-    chunk_text = Column(Text, nullable=False)
-    # embedding column omitted for SQLite test compatibility (pgvector is PostgreSQL-only)
-    metadata_ = Column("metadata", Text)  # JSON string
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    grade_level: Mapped[str] = mapped_column(Text, nullable=False)
+    subject: Mapped[str] = mapped_column(Text, nullable=False)
+    source: Mapped[str] = mapped_column(Text, nullable=False)
+    chunk_text: Mapped[str] = mapped_column(Text, nullable=False)
+    embedding: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
