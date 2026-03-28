@@ -25,6 +25,6 @@
     @apply bg-bg text-text-primary font-sans;
   }
   *:focus-visible {
-    @apply outline-2 outline-primary outline-offset-2;
+    @apply ring-2 ring-primary ring-offset-2;
   }
 }

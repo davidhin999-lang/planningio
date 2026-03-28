@@ -1,3 +1,4 @@
+import forms from '@tailwindcss/forms'
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ['class'],
@@ -18,6 +19,7 @@ export default {
           DEFAULT: '#4338CA',
           50: '#EEF2FF',
           100: '#E0E7FF',
+          500: '#6366F1',
           600: '#4F46E5',
           700: '#4338CA',
           800: '#3730A3',
@@ -27,6 +29,8 @@ export default {
           DEFAULT: '#D97706',
           50: '#FFFBEB',
           100: '#FEF3C7',
+          500: '#F59E0B',
+          600: '#D97706',
           foreground: '#FFFFFF',
         },
         bg: '#FAFAF9',
@@ -44,5 +48,5 @@ export default {
       },
     },
   },
-  plugins: [require('@tailwindcss/forms')],
+  plugins: [forms],
 }
