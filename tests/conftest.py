@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from flask import g
 
@@ -13,7 +13,25 @@ TEST_USER_EMAIL = "teacher@example.com"
 
 @pytest.fixture(scope="session")
 def engine():
-    eng = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    from sqlalchemy.pool import StaticPool
+
+    eng = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+
+    # pysqlite workaround: use manual transaction control so that SAVEPOINT +
+    # RELEASE SAVEPOINT inside a session.commit() can still be rolled back by
+    # the outer connection.rollback() in test teardown.
+    @event.listens_for(eng, "connect")
+    def _set_autocommit(dbapi_conn, _rec):
+        dbapi_conn.isolation_level = None  # disable pysqlite implicit transactions
+
+    @event.listens_for(eng, "begin")
+    def _begin(conn):
+        conn.exec_driver_sql("BEGIN")
+
     from db import init_db
     init_db(engine=eng)
     return eng
