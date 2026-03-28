@@ -60,6 +60,7 @@ export default function Login() {
       navigate('/dashboard')
     } catch (err) {
       setError(FIREBASE_ERRORS[err.code] ?? 'No se pudo iniciar sesión con Google.')
+    } finally {
       setLoading(false)
     }
   }
