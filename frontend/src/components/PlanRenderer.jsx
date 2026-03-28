@@ -41,7 +41,7 @@ export default function PlanRenderer({ content }) {
     <div className="space-y-4">
       {/* Propósito */}
       <Section title="Propósito de la sesión">
-        <p className="text-sm text-muted-foreground leading-relaxed">{proposito}</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">{proposito ?? ''}</p>
       </Section>
 
       {/* Secuencia didáctica */}
@@ -84,7 +84,7 @@ export default function PlanRenderer({ content }) {
           </ul>
         </Section>
         <Section title="Evaluación">
-          <p className="text-sm text-muted-foreground leading-relaxed">{evaluacion}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">{evaluacion ?? ''}</p>
         </Section>
       </div>
 
