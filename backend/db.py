@@ -26,9 +26,10 @@ def get_session_factory(engine=None):
 
 
 def init_db(engine=None):
-    from models.models import Base as ModelsBase  # noqa — registers models
+    # Import all models so they register with Base.metadata
+    import models.models  # noqa — side effect: registers all models
     target = engine or get_engine()
-    ModelsBase.metadata.create_all(bind=target)
+    Base.metadata.create_all(bind=target)
 
 
 def get_db():
